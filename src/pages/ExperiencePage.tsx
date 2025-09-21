@@ -53,44 +53,36 @@ export const ExperiencePage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-green-900 flex items-center justify-center">
-        <LoadingSpinner size="large" text="Loading experience..." />
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden text-white">
+        <div className="absolute inset-0 bg-[#020213]/85" />
+        <div className="relative z-10">
+          <LoadingSpinner size="large" text="Loading experience..." />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-green-900 py-20 relative overflow-hidden">
-      {/* Background elements */}
-      <div className="absolute inset-0 opacity-5">
-        <motion.div
-          className="absolute top-40 left-10 w-96 h-96 bg-gradient-to-r from-green-400 to-blue-500 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            rotate: [0, 180, 360]
-          }}
-          transition={{
-            duration: 30,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-        />
+    <div className="relative min-h-screen overflow-hidden py-20 text-white">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[#03021a]/58" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.36)_0%,_rgba(17,24,39,0.14)_60%,_rgba(2,6,23,0)_100%)]" />
       </div>
 
-      <div ref={containerRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div ref={containerRef} className="relative z-10 mx-auto w-full space-y-20 px-4 sm:px-8 lg:px-16 xl:px-24 2xl:px-32">
         <motion.div
           className="text-center mb-16"
           initial={{ y: -50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <h1 
-            className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent"
+          <h1
+            className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-indigo-300 via-sky-400 to-purple-400 bg-clip-text text-transparent"
             data-cursor="text"
           >
             Experience
           </h1>
-          <div className="w-24 h-1 bg-gradient-to-r from-green-400 to-blue-400 mx-auto rounded-full" />
+          <div className="mx-auto h-1 w-24 rounded-full bg-gradient-to-r from-indigo-300 via-sky-400 to-purple-400" />
           <p className="text-gray-300 text-xl mt-6 max-w-2xl mx-auto" data-cursor="text">
             My professional journey building amazing digital experiences
           </p>
@@ -98,7 +90,7 @@ export const ExperiencePage = () => {
 
         <div className="relative timeline-container">
           {/* Timeline line */}
-          <div className="absolute left-1/2 transform -translate-x-1/2 w-1 bg-gradient-to-b from-green-400 to-blue-400 timeline-line" 
+          <div className="timeline-line absolute left-1/2 w-1 -translate-x-1/2 transform bg-gradient-to-b from-indigo-400 via-sky-400 to-purple-500" 
                style={{ height: '0%', top: '0%' }} />
 
           <div className="space-y-16">
@@ -112,9 +104,9 @@ export const ExperiencePage = () => {
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
                 {/* Timeline dot */}
-                <div className="absolute left-1/2 transform -translate-x-1/2 z-20">
+                <div className="absolute left-1/2 z-20 -translate-x-1/2 transform">
                   <motion.div
-                    className="w-6 h-6 bg-gradient-to-r from-green-400 to-blue-400 rounded-full border-4 border-gray-900 shadow-lg"
+                    className="h-6 w-6 rounded-full border-4 border-slate-950 bg-gradient-to-r from-indigo-400 via-sky-400 to-purple-400 shadow-lg"
                     whileHover={{ scale: 1.5 }}
                     transition={{ type: "spring", stiffness: 400, damping: 17 }}
                   />
@@ -123,10 +115,10 @@ export const ExperiencePage = () => {
                 {/* Content card */}
                 <div className={`w-5/12 ${index % 2 === 0 ? 'pr-16' : 'pl-16'}`}>
                   <motion.div
-                    className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm border border-white/10 rounded-xl p-8 shadow-xl"
+                    className="rounded-xl border border-white/10 bg-gradient-to-br from-slate-900/80 to-indigo-950/75 p-8 shadow-xl backdrop-blur-md"
                     whileHover={{ 
-                      borderColor: 'rgba(34, 197, 94, 0.5)',
-                      boxShadow: '0 25px 50px -12px rgba(34, 197, 94, 0.25)'
+                      borderColor: 'rgba(56, 189, 248, 0.45)',
+                      boxShadow: '0 25px 50px -12px rgba(56, 189, 248, 0.35)'
                     }}
                     data-cursor="pointer"
                   >
@@ -134,15 +126,15 @@ export const ExperiencePage = () => {
                       <h3 className="text-2xl font-bold text-white mb-2" data-cursor="text">
                         {experience.role}
                       </h3>
-                      <p className="text-green-400 font-semibold text-lg" data-cursor="text">
+                      <p className="text-indigo-300 font-semibold text-lg" data-cursor="text">
                         {experience.company}
                       </p>
-                      <p className="text-gray-400" data-cursor="text">
+                      <p className="text-slate-300" data-cursor="text">
                         {experience.duration}
                       </p>
                     </div>
 
-                    <p className="text-gray-300 mb-6 leading-relaxed" data-cursor="text">
+                    <p className="text-indigo-100/80 mb-6 leading-relaxed" data-cursor="text">
                       {experience.description}
                     </p>
 
@@ -151,8 +143,8 @@ export const ExperiencePage = () => {
                         {experience.technologies.map((tech, techIndex) => (
                           <motion.span
                             key={techIndex}
-                            className="px-3 py-1 bg-green-400/20 text-green-300 rounded-full text-sm font-medium border border-green-400/30"
-                            whileHover={{ scale: 1.1, backgroundColor: 'rgba(34, 197, 94, 0.3)' }}
+                            className="rounded-full border border-sky-400/40 bg-sky-400/15 px-3 py-1 text-sm font-medium text-sky-200"
+                            whileHover={{ scale: 1.1, backgroundColor: 'rgba(56, 189, 248, 0.3)' }}
                             transition={{ type: "spring", stiffness: 400, damping: 17 }}
                           >
                             {tech}

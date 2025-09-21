@@ -1,7 +1,6 @@
 ﻿import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { Navigation } from './components/navigation/Navigation';
-import { GalaxyBackground } from './components/visuals/GalaxyBackground';
 import { CustomCursor } from './components/ui/CustomCursor';
 import { HomePage } from './pages/HomePage';
 import { AboutPage } from './pages/AboutPage';
@@ -11,6 +10,7 @@ import { ProjectsPage } from './pages/ProjectsPage';
 import { ContactPage } from './pages/ContactPage';
 import { AdminPage } from './pages/AdminPage';
 import { useSmoothScroll } from './hooks/useSmoothScroll';
+import { SpaceBackdrop } from './components/visuals/SpaceBackdrop';
 
 const scrollToId = (sectionId?: string | null) => {
   if (!sectionId) return;
@@ -68,8 +68,8 @@ export default function App() {
   return (
     <Router>
       <ScrollManager />
-      <div className="min-h-screen relative overflow-hidden bg-black text-white">
-        <GalaxyBackground />
+      <div className="min-h-screen relative overflow-hidden text-white">
+        <SpaceBackdrop className="opacity-90" />
         <CustomCursor />
         <Navigation />
         <main className="page-transition">

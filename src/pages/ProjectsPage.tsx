@@ -45,58 +45,36 @@ export const ProjectsPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-blue-900 flex items-center justify-center">
-        <LoadingSpinner size="large" text="Loading projects..." />
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden text-white">
+        <div className="absolute inset-0 bg-[#020213]/85" />
+        <div className="relative z-10">
+          <LoadingSpinner size="large" text="Loading projects..." />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-blue-900 py-20 relative overflow-hidden">
-      {/* Background elements */}
-      <div className="absolute inset-0 opacity-5">
-        <motion.div
-          className="absolute top-32 left-16 w-72 h-72 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 1.3, 1],
-            x: [0, 30, 0],
-            y: [0, -20, 0]
-          }}
-          transition={{
-            duration: 15,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-        />
-        <motion.div
-          className="absolute bottom-32 right-16 w-96 h-96 bg-gradient-to-r from-purple-400 to-blue-500 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 0.8, 1],
-            x: [0, -40, 0],
-            y: [0, 30, 0]
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-        />
+    <div className="relative min-h-screen overflow-hidden py-20 text-white">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[#03021a]/58" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.36)_0%,_rgba(17,24,39,0.13)_55%,_rgba(2,6,23,0)_100%)]" />
       </div>
 
-      <div ref={containerRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div ref={containerRef} className="relative z-10 mx-auto w-full space-y-16 px-4 sm:px-8 lg:px-16 xl:px-24 2xl:px-32">
         <motion.div
           className="text-center mb-16"
           initial={{ y: -50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <h1 
-            className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent"
+          <h1
+            className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-indigo-300 via-sky-400 to-purple-400 bg-clip-text text-transparent"
             data-cursor="text"
           >
             Projects
           </h1>
-          <div className="w-24 h-1 bg-gradient-to-r from-blue-400 to-cyan-400 mx-auto rounded-full" />
+          <div className="mx-auto h-1 w-24 rounded-full bg-gradient-to-r from-indigo-300 via-sky-400 to-purple-400" />
           <p className="text-gray-300 text-xl mt-6 max-w-2xl mx-auto" data-cursor="text">
             Showcasing my passion for creating innovative digital solutions
           </p>
@@ -109,13 +87,13 @@ export const ProjectsPage = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-full p-1 border border-white/10">
+          <div className="rounded-full border border-white/10 bg-slate-900/60 p-1 backdrop-blur-md shadow-[0_25px_60px_-25px_rgba(56,189,248,0.25)]">
             <button
               onClick={() => setFilter('all')}
               className={`px-6 py-2 rounded-full font-medium transition-all duration-300 ${
                 filter === 'all' 
-                  ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white' 
-                  : 'text-gray-400 hover:text-white'
+                  ? 'bg-gradient-to-r from-indigo-500 via-sky-500 to-purple-500 text-white shadow-lg shadow-indigo-900/20' 
+                  : 'text-slate-300 hover:text-white'
               }`}
               data-cursor="pointer"
             >
@@ -125,8 +103,8 @@ export const ProjectsPage = () => {
               onClick={() => setFilter('featured')}
               className={`px-6 py-2 rounded-full font-medium transition-all duration-300 ${
                 filter === 'featured' 
-                  ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white' 
-                  : 'text-gray-400 hover:text-white'
+                  ? 'bg-gradient-to-r from-indigo-500 via-sky-500 to-purple-500 text-white shadow-lg shadow-indigo-900/20' 
+                  : 'text-slate-300 hover:text-white'
               }`}
               data-cursor="pointer"
             >
@@ -136,21 +114,21 @@ export const ProjectsPage = () => {
         </motion.div>
 
         {/* Projects grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 xl:gap-10">
           {filteredProjects.map((project, index) => (
             <motion.div
               key={project.id}
-              className="project-card bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden shadow-xl group"
+              className="project-card group overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-indigo-950/70 to-sky-900/60 shadow-xl backdrop-blur-md"
               whileHover={{ 
                 scale: 1.05,
-                borderColor: 'rgba(59, 130, 246, 0.5)',
-                boxShadow: '0 25px 50px -12px rgba(59, 130, 246, 0.25)'
+                borderColor: 'rgba(99, 102, 241, 0.5)',
+                boxShadow: '0 25px 50px -12px rgba(99, 102, 241, 0.35)'
               }}
               onClick={() => setSelectedProject(project)}
               data-cursor="pointer"
             >
               {/* Project image */}
-              <div className="aspect-video bg-gradient-to-br from-blue-400/20 to-cyan-400/20 relative overflow-hidden">
+              <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-indigo-400/20 via-sky-400/15 to-purple-400/20">
                 {project.image_url ? (
                   <img
                     src={project.image_url}
@@ -160,7 +138,7 @@ export const ProjectsPage = () => {
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <motion.div
-                      className="w-20 h-20 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center text-white text-3xl font-bold"
+                      className="flex h-20 w-20 items-center justify-center rounded-lg bg-gradient-to-r from-indigo-500 via-sky-500 to-purple-500 text-3xl font-bold text-white"
                       whileHover={{ rotate: 360 }}
                       transition={{ duration: 0.6 }}
                     >
@@ -172,7 +150,7 @@ export const ProjectsPage = () => {
                 {project.featured && (
                   <div className="absolute top-4 right-4">
                     <motion.span
-                      className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black px-3 py-1 rounded-full text-xs font-bold"
+                      className="rounded-full bg-gradient-to-r from-amber-300 via-yellow-300 to-orange-300 px-3 py-1 text-xs font-bold text-slate-900"
                       animate={{ 
                         boxShadow: ['0 0 0 0 rgba(245, 158, 11, 0.7)', '0 0 0 10px rgba(245, 158, 11, 0)'],
                       }}
@@ -186,11 +164,11 @@ export const ProjectsPage = () => {
 
               {/* Project content */}
               <div className="p-6">
-                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors duration-300" data-cursor="text">
+                <h3 className="text-xl font-bold text-white mb-2 transition-colors duration-300 group-hover:text-sky-400" data-cursor="text">
                   {project.title}
                 </h3>
                 
-                <p className="text-gray-300 text-sm mb-4 line-clamp-2" data-cursor="text">
+                <p className="text-indigo-100/80 text-sm mb-4 line-clamp-2" data-cursor="text">
                   {project.description}
                 </p>
 
@@ -200,13 +178,13 @@ export const ProjectsPage = () => {
                     {project.technologies.slice(0, 3).map((tech, techIndex) => (
                       <span
                         key={techIndex}
-                        className="px-2 py-1 bg-blue-400/20 text-blue-300 rounded text-xs font-medium border border-blue-400/30"
+                        className="rounded border border-sky-400/40 bg-sky-400/15 px-2 py-1 text-xs font-medium text-sky-200"
                       >
                         {tech}
                       </span>
                     ))}
                     {project.technologies.length > 3 && (
-                      <span className="px-2 py-1 bg-gray-400/20 text-gray-300 rounded text-xs">
+                      <span className="rounded bg-slate-400/10 px-2 py-1 text-xs text-slate-200">
                         +{project.technologies.length - 3} more
                       </span>
                     )}
@@ -214,13 +192,13 @@ export const ProjectsPage = () => {
                 )}
 
                 {/* Action buttons */}
-                <div className="flex space-x-2">
+                <div className="flex gap-2">
                   {project.live_url && (
                     <motion.a
                       href={project.live_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-medium hover:shadow-lg transition-all duration-300"
+                      className="flex flex-1 items-center justify-center rounded-lg bg-gradient-to-r from-indigo-500 via-sky-500 to-purple-500 px-4 py-2 font-medium text-white shadow-[0_18px_40px_-18px_rgba(56,189,248,0.45)] transition-all duration-300 hover:shadow-indigo-900/30"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={(e) => e.stopPropagation()}
@@ -236,7 +214,7 @@ export const ProjectsPage = () => {
                       href={project.github_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center px-4 py-2 border border-gray-600 text-gray-300 rounded-lg font-medium hover:border-blue-400 hover:text-blue-400 transition-all duration-300"
+                      className="flex flex-1 items-center justify-center rounded-lg border border-slate-600 px-4 py-2 font-medium text-slate-200 transition-all duration-300 hover:border-sky-400 hover:text-sky-300"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={(e) => e.stopPropagation()}
@@ -262,14 +240,14 @@ export const ProjectsPage = () => {
       {/* Project modal */}
       {selectedProject && (
         <motion.div
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={() => setSelectedProject(null)}
         >
           <motion.div
-            className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-white/10"
+            className="w-full max-h-[90vh] max-w-4xl overflow-y-auto rounded-xl border border-white/10 bg-gradient-to-br from-slate-950 via-indigo-950 to-sky-950 p-8 shadow-[0_40px_70px_-35px_rgba(56,189,248,0.35)]"
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
@@ -296,18 +274,18 @@ export const ProjectsPage = () => {
               />
             )}
 
-            <p className="text-gray-300 text-lg leading-relaxed mb-6" data-cursor="text">
+            <p className="mb-6 text-lg leading-relaxed text-indigo-100/85" data-cursor="text">
               {selectedProject.description}
             </p>
 
             {selectedProject.technologies && selectedProject.technologies.length > 0 && (
               <div className="mb-6">
-                <h3 className="text-xl font-semibold text-white mb-3">Technologies Used</h3>
+                <h3 className="mb-3 text-xl font-semibold text-white">Technologies Used</h3>
                 <div className="flex flex-wrap gap-3">
                   {selectedProject.technologies.map((tech, index) => (
                     <span
                       key={index}
-                      className="px-4 py-2 bg-blue-400/20 text-blue-300 rounded-full font-medium border border-blue-400/30"
+                      className="rounded-full border border-sky-400/40 bg-sky-400/15 px-4 py-2 font-medium text-sky-200"
                     >
                       {tech}
                     </span>
@@ -316,13 +294,13 @@ export const ProjectsPage = () => {
               </div>
             )}
 
-            <div className="flex space-x-4">
+            <div className="flex gap-4">
               {selectedProject.live_url && (
                 <motion.a
                   href={selectedProject.live_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
+                  className="flex items-center rounded-lg bg-gradient-to-r from-indigo-500 via-sky-500 to-purple-500 px-6 py-3 font-semibold text-white shadow-[0_25px_60px_-30px_rgba(56,189,248,0.6)] transition-all duration-300 hover:shadow-indigo-900/40"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   data-cursor="pointer"
@@ -337,7 +315,7 @@ export const ProjectsPage = () => {
                   href={selectedProject.github_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center px-6 py-3 border border-gray-600 text-gray-300 rounded-lg font-semibold hover:border-blue-400 hover:text-blue-400 transition-all duration-300"
+                  className="flex items-center rounded-lg border border-slate-600 px-6 py-3 font-semibold text-slate-200 transition-all duration-300 hover:border-sky-400 hover:text-sky-300"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   data-cursor="pointer"

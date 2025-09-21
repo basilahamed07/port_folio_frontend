@@ -39,69 +39,40 @@ export const AboutPage = () => {
         );
       }
 
-      // Parallax effect for background elements
-      gsap.to(".parallax-bg", {
-        yPercent: -50,
-        ease: "none",
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: true
-        }
-      });
     }
   }, [loading, profile]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-indigo-900 flex items-center justify-center">
-        <LoadingSpinner size="large" text="Loading about..." />
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden text-white">
+        <div className="absolute inset-0 bg-[#020213]/85" />
+        <div className="relative z-10">
+          <LoadingSpinner size="large" text="Loading about..." />
+        </div>
       </div>
     );
   }
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-indigo-900 flex items-center justify-center">
-        <p className="text-white text-xl">Profile not found</p>
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden text-white">
+        <div className="absolute inset-0 bg-[#020213]/85" />
+        <p className="relative z-10 text-xl">Profile not found</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-indigo-900 py-20 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="parallax-bg absolute inset-0 opacity-10">
-        <motion.div
-          className="absolute top-20 left-20 w-72 h-72 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full blur-3xl"
-          animate={{
-            x: [0, 30, 0],
-            y: [0, -20, 0],
-            rotate: [0, 180, 360]
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-        />
-        <motion.div
-          className="absolute bottom-20 right-20 w-96 h-96 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full blur-3xl"
-          animate={{
-            x: [0, -40, 0],
-            y: [0, 30, 0],
-            rotate: [0, -180, -360]
-          }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-        />
+    <div className="relative min-h-screen overflow-hidden py-20 text-white">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[#03021a]/58" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(55,48,163,0.42)_0%,_rgba(17,24,39,0.12)_45%,_rgba(2,6,23,0)_100%)]" />
       </div>
 
-      <div ref={containerRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div
+        ref={containerRef}
+        className="relative z-10 mx-auto w-full space-y-16 px-4 sm:px-8 lg:px-16 xl:px-24 2xl:px-32"
+      >
         <motion.div
           className="text-center mb-16"
           initial={{ y: -50, opacity: 0 }}

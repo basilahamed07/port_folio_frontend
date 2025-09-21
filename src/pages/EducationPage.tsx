@@ -41,58 +41,36 @@ export const EducationPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-orange-900 flex items-center justify-center">
-        <LoadingSpinner size="large" text="Loading education..." />
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden text-white">
+        <div className="absolute inset-0 bg-[#020213]/85" />
+        <div className="relative z-10">
+          <LoadingSpinner size="large" text="Loading education..." />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-orange-900 py-20 relative overflow-hidden">
-      {/* Background elements */}
-      <div className="absolute inset-0 opacity-5">
-        <motion.div
-          className="absolute top-20 right-20 w-80 h-80 bg-gradient-to-r from-orange-400 to-red-500 rounded-full blur-3xl"
-          animate={{
-            x: [0, 50, 0],
-            y: [0, -30, 0],
-            scale: [1, 1.1, 1]
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-        />
-        <motion.div
-          className="absolute bottom-20 left-20 w-96 h-96 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full blur-3xl"
-          animate={{
-            x: [0, -40, 0],
-            y: [0, 20, 0],
-            scale: [1, 0.9, 1]
-          }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-        />
+    <div className="relative min-h-screen overflow-hidden py-20 text-white">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[#03021a]/58" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(37,99,235,0.38)_0%,_rgba(17,24,39,0.16)_50%,_rgba(2,6,23,0)_100%)]" />
       </div>
 
-      <div ref={containerRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div ref={containerRef} className="relative z-10 mx-auto w-full space-y-20 px-4 sm:px-8 lg:px-16 xl:px-24 2xl:px-32">
         <motion.div
           className="text-center mb-16"
           initial={{ y: -50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <h1 
-            className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent"
+          <h1
+            className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-indigo-300 via-sky-400 to-purple-400 bg-clip-text text-transparent"
             data-cursor="text"
           >
             Education
           </h1>
-          <div className="w-24 h-1 bg-gradient-to-r from-orange-400 to-red-400 mx-auto rounded-full" />
+          <div className="mx-auto h-1 w-24 rounded-full bg-gradient-to-r from-indigo-300 via-sky-400 to-purple-400" />
           <p className="text-gray-300 text-xl mt-6 max-w-2xl mx-auto" data-cursor="text">
             My academic journey and continuous learning path
           </p>
@@ -115,17 +93,17 @@ export const EducationPage = () => {
               {educationItems.map((item, index) => (
                 <motion.div
                   key={item.id}
-                  className="education-item bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm border border-white/10 rounded-xl p-6 shadow-xl group"
+                  className="education-item group rounded-xl border border-white/10 bg-gradient-to-br from-slate-900/80 to-indigo-950/70 p-6 shadow-xl backdrop-blur-md"
                   whileHover={{ 
                     scale: 1.05,
-                    borderColor: 'rgba(251, 146, 60, 0.5)',
-                    boxShadow: '0 25px 50px -12px rgba(251, 146, 60, 0.25)'
+                    borderColor: 'rgba(79, 70, 229, 0.45)',
+                    boxShadow: '0 25px 50px -12px rgba(79, 70, 229, 0.35)'
                   }}
                   data-cursor="pointer"
                 >
                   <div className="mb-4">
                     <motion.div
-                      className="w-16 h-16 bg-gradient-to-r from-orange-400 to-red-400 rounded-lg flex items-center justify-center text-white text-2xl font-bold mb-4 group-hover:scale-110 transition-transform duration-300"
+                      className="mb-4 flex h-16 w-16 items-center justify-center rounded-lg bg-gradient-to-r from-indigo-400 via-sky-400 to-purple-500 text-2xl font-bold text-white transition-transform duration-300 group-hover:scale-110"
                     >
                       🏫
                     </motion.div>
@@ -133,7 +111,7 @@ export const EducationPage = () => {
                     <h3 className="text-xl font-bold text-white mb-2" data-cursor="text">
                       {item.degree}
                     </h3>
-                    <p className="text-orange-400 font-semibold" data-cursor="text">
+                    <p className="font-semibold text-indigo-300" data-cursor="text">
                       {item.school_name}
                     </p>
                     <p className="text-gray-400 text-sm" data-cursor="text">
@@ -167,17 +145,17 @@ export const EducationPage = () => {
               {certifications.map((cert, index) => (
                 <motion.div
                   key={cert.id}
-                  className="cert-item bg-gradient-to-r from-orange-400/10 to-red-400/10 backdrop-blur-sm border border-orange-400/20 rounded-xl p-8 shadow-xl group"
+                  className="cert-item group rounded-xl border border-indigo-400/25 bg-gradient-to-r from-indigo-500/15 via-sky-500/10 to-purple-500/15 p-8 shadow-[0_20px_45px_rgba(56,189,248,0.15)] backdrop-blur-md"
                   whileHover={{ 
                     scale: 1.02,
-                    borderColor: 'rgba(251, 146, 60, 0.5)',
-                    backgroundColor: 'rgba(251, 146, 60, 0.1)'
+                    borderColor: 'rgba(56, 189, 248, 0.55)',
+                    backgroundColor: 'rgba(79, 70, 229, 0.12)'
                   }}
                   data-cursor="pointer"
                 >
                   <div className="flex items-start space-x-4">
                     <motion.div
-                      className="flex-shrink-0 w-20 h-20 bg-gradient-to-r from-orange-400 to-red-400 rounded-xl flex items-center justify-center text-white text-3xl group-hover:scale-110 transition-transform duration-300"
+                      className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-400 via-sky-400 to-purple-500 text-3xl text-white transition-transform duration-300 group-hover:scale-110"
                     >
                       🎖️
                     </motion.div>
@@ -186,7 +164,7 @@ export const EducationPage = () => {
                       <h3 className="text-2xl font-bold text-white mb-2" data-cursor="text">
                         {cert.degree}
                       </h3>
-                      <p className="text-orange-400 font-semibold text-lg mb-1" data-cursor="text">
+                      <p className="text-indigo-300 font-semibold text-lg mb-1" data-cursor="text">
                         {cert.school_name}
                       </p>
                       <p className="text-gray-400 mb-4" data-cursor="text">

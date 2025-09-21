@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { NeuralNetwork } from '../components/animations/NeuralNetwork';
 import { HeroOrb } from '../components/animations/HeroOrb';
 import { useProfile, useExperiences, useEducation, useProjects } from '../hooks/usePortfolioData';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
@@ -43,6 +42,9 @@ const cardHover = {
   whileHover: { y: -6, scale: 1.01 },
   whileTap: { scale: 0.99 },
 };
+
+const sectionShellClass =
+  'relative z-10 w-full scroll-mt-28 px-4 py-20 sm:px-8 lg:px-14 xl:px-20 2xl:px-28';
 
 export const HomePage = () => {
   const { profile, loading: profileLoading } = useProfile();
@@ -166,22 +168,17 @@ export const HomePage = () => {
   };
 
   return (
-    <div
-      ref={pageRef}
-      className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#030014] via-[#0b0123] to-[#1a0135] text-white"
-    >
-      <NeuralNetwork className="opacity-70" />
+    <div ref={pageRef} className="relative min-h-screen overflow-hidden text-white">
 
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-48 left-1/2 h-[28rem] w-[28rem] -translate-x-1/2 rounded-full bg-indigo-500/20 blur-3xl" />
-        <div className="absolute bottom-16 right-[-6rem] h-72 w-72 rounded-full bg-purple-500/20 blur-3xl" />
-        <div className="absolute left-12 top-1/3 h-64 w-64 rounded-full bg-sky-500/10 blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#312e81_0%,rgba(15,23,42,0)_60%)] opacity-40" />
+        <div className="absolute inset-0 bg-[#03021a]/60" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(30,64,175,0.45)_0%,_rgba(12,10,25,0.12)_45%,_rgba(2,6,23,0.18)_75%,_rgba(2,6,23,0)_100%)] opacity-70" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,_rgba(76,5,124,0.28)_0%,_rgba(18,2,40,0.1)_55%,_rgba(2,6,23,0)_100%)] mix-blend-screen opacity-60" />
       </div>
 
-      <section id="hero" className="relative z-10 flex min-h-screen items-center px-4 py-24 sm:px-6 lg:px-12">
-        <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-16 lg:grid-cols-[minmax(0,_1.05fr)_minmax(0,_0.95fr)]">
-          <div className="flex flex-col justify-center space-y-10 text-center lg:text-left">
+      <section id="hero" className="relative z-10 flex min-h-screen w-full items-center px-4 py-16 sm:px-6 lg:px-12 xl:px-16">
+        <div className="grid w-full grid-cols-1 gap-12 sm:gap-16 lg:grid-cols-[minmax(0,_1.05fr)_minmax(0,_0.95fr)] lg:items-center xl:gap-20 2xl:gap-24">
+          <div className="flex flex-col justify-center space-y-9 text-center lg:text-left">
             <span
               className="hero-kicker inline-flex items-center justify-center gap-2 self-center rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold uppercase tracking-[0.3em] text-indigo-200 shadow-lg shadow-indigo-500/10 lg:self-start"
               data-cursor="text"
@@ -243,7 +240,7 @@ export const HomePage = () => {
               </motion.button>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 text-left sm:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 text-left sm:grid-cols-2 lg:grid-cols-4">
               {stats.map((item) => (
                 <motion.div
                   key={item.label}
@@ -259,13 +256,13 @@ export const HomePage = () => {
             </div>
           </div>
 
-          <div className="relative flex items-center justify-center">
-            <div className="reveal-on-scroll relative flex aspect-square w-full max-w-[480px] items-center justify-center rounded-[40px] border border-white/10 bg-white/5 p-8 backdrop-blur-2xl">
-              <div className="absolute inset-12 -z-10 rounded-full bg-gradient-to-tr from-indigo-500/40 via-purple-500/30 to-sky-400/30 blur-3xl" />
+          <div className="relative flex items-center justify-center lg:pl-6 xl:pl-10 2xl:pl-16">
+            <div className="reveal-on-scroll relative flex aspect-square w-full max-w-[460px] items-center justify-center rounded-[36px] border border-white/10 bg-white/5 p-6 shadow-2xl shadow-indigo-950/40 backdrop-blur-2xl backdrop-saturate-150 sm:max-w-[520px] sm:rounded-[42px] sm:p-8 2xl:max-w-[560px]">
+              <div className="absolute inset-10 -z-10 rounded-[52px] bg-gradient-to-tr from-indigo-500/40 via-purple-500/30 to-sky-400/30 blur-3xl sm:inset-12" />
               <HeroOrb className="h-full w-full" />
 
               <motion.div
-                className="absolute -right-10 top-1/3 w-40 rounded-3xl border border-white/10 bg-white/10 p-4 text-left backdrop-blur-xl"
+                className="absolute -right-6 top-1/3 w-40 rounded-3xl border border-white/15 bg-white/10 p-4 text-left backdrop-blur-xl sm:-right-10"
                 initial={{ opacity: 0, x: 40 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, amount: 0.5 }}
@@ -277,7 +274,7 @@ export const HomePage = () => {
               </motion.div>
 
               <motion.div
-                className="absolute -left-12 bottom-6 w-44 rounded-3xl border border-white/10 bg-white/10 p-4 text-left backdrop-blur-xl"
+                className="absolute -left-6 bottom-6 w-44 rounded-3xl border border-white/15 bg-white/10 p-4 text-left backdrop-blur-xl sm:-left-12"
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.5 }}
@@ -292,16 +289,13 @@ export const HomePage = () => {
         </div>
       </section>
 
-      <section
-        id="about"
-        className="relative z-10 mx-auto w-full max-w-6xl scroll-mt-28 px-4 py-20 sm:px-6 lg:px-8"
-      >
+      <section id="about" className={sectionShellClass}>
         <motion.div
           variants={sectionVariant}
           initial="initial"
           whileInView="animate"
           viewport={{ once: true, amount: 0.4 }}
-          className="reveal-on-scroll grid gap-10 rounded-[32px] border border-white/10 bg-white/5 p-10 backdrop-blur-2xl lg:grid-cols-[1.2fr_0.8fr]"
+          className="reveal-on-scroll grid w-full gap-12 rounded-[32px] border border-white/10 bg-white/5 p-8 backdrop-blur-2xl lg:grid-cols-[minmax(0,_1.2fr)_minmax(0,_0.8fr)] lg:p-10 xl:gap-14"
         >
           <div className="space-y-6">
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-200" data-cursor="text">
@@ -343,16 +337,13 @@ export const HomePage = () => {
         </motion.div>
       </section>
 
-      <section
-        id="experience"
-        className="relative z-10 mx-auto w-full max-w-6xl scroll-mt-28 px-4 pb-20 sm:px-6 lg:px-8"
-      >
+      <section id="experience" className={sectionShellClass}>
         <motion.div
           variants={sectionVariant}
           initial="initial"
           whileInView="animate"
           viewport={{ once: true, amount: 0.4 }}
-          className="reveal-on-scroll"
+          className="reveal-on-scroll w-full"
         >
           <div className="flex flex-col gap-4 pb-10 text-left lg:flex-row lg:items-end lg:justify-between">
             <div>
@@ -364,7 +355,7 @@ export const HomePage = () => {
             </p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:gap-8 2xl:gap-10">
             {topExperiences.map((experience) => (
               <motion.article
                 key={experience.id}
@@ -394,16 +385,13 @@ export const HomePage = () => {
         </motion.div>
       </section>
 
-      <section
-        id="education"
-        className="relative z-10 mx-auto w-full max-w-6xl scroll-mt-28 px-4 pb-20 sm:px-6 lg:px-8"
-      >
+      <section id="education" className={sectionShellClass}>
         <motion.div
           variants={sectionVariant}
           initial="initial"
           whileInView="animate"
           viewport={{ once: true, amount: 0.4 }}
-          className="reveal-on-scroll space-y-8"
+          className="reveal-on-scroll w-full space-y-8"
         >
           <div className="relative overflow-hidden rounded-[36px] border border-white/10 bg-white/5 p-10 backdrop-blur-2xl">
             <div className="pointer-events-none absolute -top-32 left-[10%] h-64 w-64 rounded-full bg-indigo-500/20 blur-3xl" />
@@ -506,16 +494,13 @@ export const HomePage = () => {
           </div>
         </motion.div>
       </section>
-      <section
-        id="projects"
-        className="relative z-10 mx-auto w-full max-w-6xl scroll-mt-28 px-4 pb-20 sm:px-6 lg:px-8"
-      >
+      <section id="projects" className={sectionShellClass}>
         <motion.div
           variants={sectionVariant}
           initial="initial"
           whileInView="animate"
           viewport={{ once: true, amount: 0.4 }}
-          className="reveal-on-scroll"
+          className="reveal-on-scroll w-full"
         >
           <div className="flex flex-col gap-4 pb-10 text-left lg:flex-row lg:items-end lg:justify-between">
             <div>
@@ -527,7 +512,7 @@ export const HomePage = () => {
             </p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:gap-8 2xl:gap-10">
             {featuredProjects.map((project) => (
               <motion.article
                 key={project.id}
@@ -573,16 +558,13 @@ export const HomePage = () => {
         </motion.div>
       </section>
 
-      <section
-        id="contact"
-        className="relative z-10 mx-auto w-full max-w-6xl scroll-mt-28 px-4 pb-32 sm:px-6 lg:px-8"
-      >
+      <section id="contact" className={`${sectionShellClass} pb-32`}>
         <motion.div
           variants={sectionVariant}
           initial="initial"
           whileInView="animate"
           viewport={{ once: true, amount: 0.4 }}
-          className="reveal-on-scroll relative overflow-hidden rounded-[32px] border border-white/10 bg-gradient-to-br from-indigo-500/30 via-purple-500/20 to-sky-500/30 px-8 py-12 text-center backdrop-blur-2xl sm:px-16"
+          className="reveal-on-scroll relative w-full overflow-hidden rounded-[32px] border border-white/10 bg-gradient-to-br from-indigo-500/30 via-purple-500/20 to-sky-500/30 px-8 py-12 text-center backdrop-blur-2xl sm:px-16"
         >
           <div className="absolute -top-12 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-white/10 blur-3xl" />
           <div className="relative space-y-6">
@@ -609,5 +591,3 @@ export const HomePage = () => {
     </div>
   );
 };
-
-

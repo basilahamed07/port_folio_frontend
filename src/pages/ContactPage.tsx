@@ -42,62 +42,42 @@ export const ContactPage = () => {
 
   if (profileLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-pink-900 flex items-center justify-center">
-        <LoadingSpinner size="large" text="Loading contact info..." />
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden text-white">
+        <div className="absolute inset-0 bg-[#020213]/85" />
+        <div className="relative z-10">
+          <LoadingSpinner size="large" text="Loading contact info..." />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-pink-900 py-20 relative overflow-hidden">
-      {/* Background elements */}
-      <div className="absolute inset-0 opacity-5">
-        <motion.div
-          className="absolute top-20 left-20 w-80 h-80 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            rotate: [0, 180, 360]
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-        />
-        <motion.div
-          className="absolute bottom-20 right-20 w-96 h-96 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 0.9, 1],
-            rotate: [0, -180, -360]
-          }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-        />
+    <div className="relative min-h-screen overflow-hidden py-20 text-white">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[#03021a]/58" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(236,72,153,0.35)_0%,_rgba(17,24,39,0.12)_55%,_rgba(2,6,23,0)_100%)]" />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="relative z-10 mx-auto w-full space-y-16 px-4 sm:px-8 lg:px-16 xl:px-24 2xl:px-32">
         <motion.div
           className="text-center mb-16"
           initial={{ y: -50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <h1 
-            className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent"
+          <h1
+            className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-indigo-300 via-sky-400 to-purple-400 bg-clip-text text-transparent"
             data-cursor="text"
           >
             Get In Touch
           </h1>
-          <div className="w-24 h-1 bg-gradient-to-r from-pink-400 to-purple-400 mx-auto rounded-full" />
-          <p className="text-gray-300 text-xl mt-6 max-w-2xl mx-auto" data-cursor="text">
+          <div className="mx-auto h-1 w-24 rounded-full bg-gradient-to-r from-indigo-300 via-sky-400 to-purple-400" />
+          <p className="mx-auto mt-6 max-w-2xl text-xl text-indigo-100/85" data-cursor="text">
             Let's collaborate and create something amazing together
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+        <div className="grid grid-cols-1 items-start gap-16 lg:grid-cols-2">
           {/* Contact form */}
           <motion.div
             className="order-2 lg:order-1"
@@ -105,7 +85,7 @@ export const ContactPage = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm border border-white/10 rounded-xl p-8 shadow-xl">
+            <div className="rounded-xl border border-white/10 bg-gradient-to-br from-slate-900/75 via-indigo-950/70 to-sky-950/60 p-8 shadow-[0_25px_60px_-30px_rgba(56,189,248,0.35)] backdrop-blur-md">
               <h2 className="text-2xl font-bold text-white mb-6" data-cursor="text">
                 Send me a message
               </h2>
@@ -113,7 +93,7 @@ export const ContactPage = () => {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
+                    <label htmlFor="name" className="mb-2 block text-sm font-medium text-indigo-100/90">
                       Your Name
                     </label>
                     <input
@@ -123,14 +103,14 @@ export const ContactPage = () => {
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-300"
+                      className="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-4 py-3 text-white outline-none transition-all duration-300 placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/60"
                       placeholder="John Doe"
                       data-cursor="text"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+                    <label htmlFor="email" className="mb-2 block text-sm font-medium text-indigo-100/90">
                       Your Email
                     </label>
                     <input
@@ -140,7 +120,7 @@ export const ContactPage = () => {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-300"
+                      className="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-4 py-3 text-white outline-none transition-all duration-300 placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/60"
                       placeholder="john@example.com"
                       data-cursor="text"
                     />
@@ -148,7 +128,7 @@ export const ContactPage = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="subject" className="block text-sm font-medium text-gray-300 mb-2">
+                  <label htmlFor="subject" className="mb-2 block text-sm font-medium text-indigo-100/90">
                     Subject
                   </label>
                   <input
@@ -158,14 +138,14 @@ export const ContactPage = () => {
                     value={formData.subject}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-300"
+                    className="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-4 py-3 text-white outline-none transition-all duration-300 placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/60"
                     placeholder="Project Collaboration"
                     data-cursor="text"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-gray-300 mb-2">
+                  <label htmlFor="message" className="mb-2 block text-sm font-medium text-indigo-100/90">
                     Message
                   </label>
                   <textarea
@@ -175,7 +155,7 @@ export const ContactPage = () => {
                     onChange={handleChange}
                     required
                     rows={6}
-                    className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-300 resize-none"
+                    className="w-full resize-none rounded-lg border border-slate-700 bg-slate-900/60 px-4 py-3 text-white outline-none transition-all duration-300 placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/60"
                     placeholder="Tell me about your project or say hello!"
                     data-cursor="text"
                   />
@@ -184,7 +164,7 @@ export const ContactPage = () => {
                 <motion.button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full px-8 py-4 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-pink-500/25 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                  className="flex w-full items-center justify-center rounded-lg bg-gradient-to-r from-indigo-500 via-sky-500 to-purple-500 px-8 py-4 font-semibold text-white transition-all duration-300 hover:shadow-[0_25px_60px_-30px_rgba(56,189,248,0.6)] disabled:cursor-not-allowed disabled:opacity-50"
                   whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
                   whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
                   data-cursor="pointer"
@@ -246,7 +226,7 @@ export const ContactPage = () => {
                 <h2 className="text-3xl font-bold text-white mb-6" data-cursor="text">
                   Let's start a conversation
                 </h2>
-                <p className="text-gray-300 text-lg leading-relaxed mb-8" data-cursor="text">
+                <p className="mb-8 text-lg leading-relaxed text-indigo-100/85" data-cursor="text">
                   I'm always interested in new opportunities, collaborations, and exciting projects. 
                   Whether you have a question, a project idea, or just want to say hello, I'd love to hear from you.
                 </p>
@@ -255,44 +235,44 @@ export const ContactPage = () => {
               {profile && (
                 <div className="space-y-6">
                   <motion.div
-                    className="flex items-center space-x-4 p-4 bg-gradient-to-r from-pink-400/10 to-purple-400/10 backdrop-blur-sm border border-pink-400/20 rounded-lg"
-                    whileHover={{ scale: 1.02, borderColor: 'rgba(244, 114, 182, 0.5)' }}
+                    className="flex items-center gap-4 rounded-lg border border-white/10 bg-gradient-to-r from-slate-900/70 via-indigo-950/60 to-sky-950/55 p-4 backdrop-blur-md"
+                    whileHover={{ scale: 1.02, borderColor: 'rgba(56, 189, 248, 0.4)' }}
                     data-cursor="pointer"
                   >
-                    <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-500 rounded-lg flex items-center justify-center text-white text-xl">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-r from-indigo-500 via-sky-500 to-purple-500 text-xl text-white">
                       ✉️
                     </div>
                     <div>
-                      <p className="text-gray-400 text-sm">Email</p>
-                      <p className="text-white font-semibold" data-cursor="text">{profile.email}</p>
+                      <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Email</p>
+                      <p className="font-semibold text-white" data-cursor="text">{profile.email}</p>
                     </div>
                   </motion.div>
 
                   <motion.div
-                    className="flex items-center space-x-4 p-4 bg-gradient-to-r from-pink-400/10 to-purple-400/10 backdrop-blur-sm border border-pink-400/20 rounded-lg"
-                    whileHover={{ scale: 1.02, borderColor: 'rgba(244, 114, 182, 0.5)' }}
+                    className="flex items-center gap-4 rounded-lg border border-white/10 bg-gradient-to-r from-slate-900/70 via-indigo-950/60 to-sky-950/55 p-4 backdrop-blur-md"
+                    whileHover={{ scale: 1.02, borderColor: 'rgba(56, 189, 248, 0.4)' }}
                     data-cursor="pointer"
                   >
-                    <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-500 rounded-lg flex items-center justify-center text-white text-xl">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-r from-indigo-500 via-sky-500 to-purple-500 text-xl text-white">
                       📍
                     </div>
                     <div>
-                      <p className="text-gray-400 text-sm">Location</p>
-                      <p className="text-white font-semibold" data-cursor="text">{profile.location}</p>
+                      <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Location</p>
+                      <p className="font-semibold text-white" data-cursor="text">{profile.location}</p>
                     </div>
                   </motion.div>
 
                   <motion.div
-                    className="flex items-center space-x-4 p-4 bg-gradient-to-r from-pink-400/10 to-purple-400/10 backdrop-blur-sm border border-pink-400/20 rounded-lg"
-                    whileHover={{ scale: 1.02, borderColor: 'rgba(244, 114, 182, 0.5)' }}
+                    className="flex items-center gap-4 rounded-lg border border-white/10 bg-gradient-to-r from-slate-900/70 via-indigo-950/60 to-sky-950/55 p-4 backdrop-blur-md"
+                    whileHover={{ scale: 1.02, borderColor: 'rgba(56, 189, 248, 0.4)' }}
                     data-cursor="pointer"
                   >
-                    <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-500 rounded-lg flex items-center justify-center text-white text-xl">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-r from-indigo-500 via-sky-500 to-purple-500 text-xl text-white">
                       ⚡
                     </div>
                     <div>
-                      <p className="text-gray-400 text-sm">Response Time</p>
-                      <p className="text-white font-semibold">Usually within 24 hours</p>
+                      <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Response Time</p>
+                      <p className="font-semibold text-white">Usually within 24 hours</p>
                     </div>
                   </motion.div>
                 </div>
@@ -300,13 +280,13 @@ export const ContactPage = () => {
 
               <div className="pt-8">
                 <motion.div
-                  className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border border-white/10 rounded-xl p-6"
-                  whileHover={{ borderColor: 'rgba(244, 114, 182, 0.3)' }}
+                  className="rounded-xl border border-white/10 bg-gradient-to-br from-slate-900/70 via-indigo-950/60 to-sky-950/55 p-6 backdrop-blur-md"
+                  whileHover={{ borderColor: 'rgba(56, 189, 248, 0.4)' }}
                 >
                   <h3 className="text-xl font-bold text-white mb-4" data-cursor="text">
                     What I can help with:
                   </h3>
-                  <ul className="space-y-2 text-gray-300">
+                  <ul className="space-y-2 text-indigo-100/85">
                     {[
                       '🚀 Frontend Development',
                       '⚛️ React Applications',

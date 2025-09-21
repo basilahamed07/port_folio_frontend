@@ -36,14 +36,14 @@ export const HeroOrb: React.FC<HeroOrbProps> = ({ className = '' }) => {
     if (!container) return;
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2('#12224d', 0.085);
+    scene.fog = new THREE.FogExp2('#12224d', 0.08);
     scene.background = null;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.25;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 0.9));
+    renderer.toneMappingExposure = 1.3;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
     renderer.shadowMap.enabled = false;
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setClearColor(0x000000, 0);
@@ -68,6 +68,7 @@ export const HeroOrb: React.FC<HeroOrbProps> = ({ className = '' }) => {
 
     const textures: THREE.Texture[] = [];
     const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
+    const targetAnisotropy = Math.min(4, maxAnisotropy);
     const textureLoader = new THREE.TextureLoader();
     textureLoader.setCrossOrigin('anonymous');
     let galaxyMesh: THREE.Mesh | null = null;
@@ -79,7 +80,7 @@ export const HeroOrb: React.FC<HeroOrbProps> = ({ className = '' }) => {
       const ctx = canvas.getContext('2d');
       const texture = new THREE.CanvasTexture(canvas);
       texture.colorSpace = THREE.SRGBColorSpace;
-      texture.anisotropy = maxAnisotropy;
+      texture.anisotropy = targetAnisotropy;
       textures.push(texture);
 
       if (!ctx) {
@@ -241,7 +242,7 @@ export const HeroOrb: React.FC<HeroOrbProps> = ({ className = '' }) => {
     const earthLightsFallback = createNightLightsTexture();
     const earthCloudsFallback = createCloudTexture();
     const galaxyTexture = createGalaxyTexture();
-    const galaxyGeometry = new THREE.SphereGeometry(8.0, 36, 36);
+    const galaxyGeometry = new THREE.SphereGeometry(8.0, 30, 30);
     geometries.push(galaxyGeometry);
     const galaxyMaterial = new THREE.MeshBasicMaterial({
       map: galaxyTexture,
@@ -254,19 +255,27 @@ export const HeroOrb: React.FC<HeroOrbProps> = ({ className = '' }) => {
     galaxyMesh = new THREE.Mesh(galaxyGeometry, galaxyMaterial);
     scene.add(galaxyMesh);
 
-    const earthGeometry = new THREE.SphereGeometry(1.55, 72, 72);
+    const earthGeometry = new THREE.SphereGeometry(1.55, 64, 64);
     geometries.push(earthGeometry);
 
-    const earthMaterial = new THREE.MeshStandardMaterial({
+    const earthMaterial = new THREE.MeshPhysicalMaterial({
       map: earthDayFallback,
-      color: new THREE.Color('#d4f0ff'),
-      roughness: 0.26,
-      metalness: 0.08,
-      emissive: new THREE.Color('#7dd3ff'),
-      emissiveIntensity: 0.28,
+      color: new THREE.Color('#e5f4ff'),
+      roughness: 0.32,
+      metalness: 0.1,
+      emissive: new THREE.Color('#5cc8ff'),
+      emissiveIntensity: 0.22,
+      clearcoat: 0.65,
+      clearcoatRoughness: 0.28,
+      ior: 1.25,
+      specularIntensity: 0.55,
+      specularColor: new THREE.Color('#96d8ff'),
+      sheen: 0.25,
+      sheenColor: new THREE.Color('#b3ecff'),
+      sheenRoughness: 0.85,
+      envMapIntensity: 1.1,
     });
-    earthMaterial.normalScale.set(0.45, 0.45);
-    earthMaterial.normalScale = new THREE.Vector2(0.45, 0.45);
+    earthMaterial.normalScale = new THREE.Vector2(0.4, 0.4);
     materials.push(earthMaterial);
 
     const earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
@@ -277,7 +286,7 @@ export const HeroOrb: React.FC<HeroOrbProps> = ({ className = '' }) => {
       transparent: true,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
-      opacity: 0.7,
+      opacity: 0.85,
     });
     materials.push(nightMaterial);
     const nightMesh = new THREE.Mesh(earthGeometry.clone(), nightMaterial);
@@ -285,17 +294,17 @@ export const HeroOrb: React.FC<HeroOrbProps> = ({ className = '' }) => {
     earthMesh.add(nightMesh);
 
     rootGroup.add(earthMesh);
-    const cloudGeometry = new THREE.SphereGeometry(1.58, 70, 70);
+    const cloudGeometry = new THREE.SphereGeometry(1.58, 58, 58);
     geometries.push(cloudGeometry);
     const cloudMaterial = new THREE.MeshLambertMaterial({
       map: earthCloudsFallback,
       transparent: true,
-      opacity: 0.5,
+      opacity: 0.38,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
       color: new THREE.Color('#f0faff'),
       emissive: new THREE.Color('#cdebff'),
-      emissiveIntensity: 0.22,
+      emissiveIntensity: 0.28,
     });
     materials.push(cloudMaterial);
     const cloudMesh = new THREE.Mesh(cloudGeometry, cloudMaterial);
@@ -304,7 +313,7 @@ export const HeroOrb: React.FC<HeroOrbProps> = ({ className = '' }) => {
     cloudMesh.renderOrder = 2;
     earthMesh.add(cloudMesh);
 
-    const atmosphereGeometry = new THREE.SphereGeometry(1.72, 64, 64);
+    const atmosphereGeometry = new THREE.SphereGeometry(1.72, 58, 58);
     geometries.push(atmosphereGeometry);
     const atmosphereMaterial = new THREE.MeshBasicMaterial({
       color: new THREE.Color('#d7f2ff'),
@@ -315,13 +324,15 @@ export const HeroOrb: React.FC<HeroOrbProps> = ({ className = '' }) => {
     });
     materials.push(atmosphereMaterial);
     const atmosphereMesh = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
+    atmosphereMesh.renderOrder = 3;
+    earthMesh.add(atmosphereMesh);
 
     const loadLocalTexture = (path: string, onLoaded: (texture: THREE.Texture) => void) => {
       textureLoader.load(
         path,
         (texture) => {
           texture.colorSpace = THREE.SRGBColorSpace;
-          texture.anisotropy = maxAnisotropy;
+          texture.anisotropy = targetAnisotropy;
           texture.needsUpdate = true;
           textures.push(texture);
           onLoaded(texture);
@@ -351,35 +362,24 @@ export const HeroOrb: React.FC<HeroOrbProps> = ({ className = '' }) => {
     loadLocalTexture('/textures/earth-normal.jpg', (texture) => {
       texture.colorSpace = THREE.NoColorSpace;
       earthMaterial.normalMap = texture;
-      earthMaterial.normalScale = new THREE.Vector2(0.45, 0.45);
+      earthMaterial.normalScale = new THREE.Vector2(0.4, 0.4);
       earthMaterial.needsUpdate = true;
     });
 
-    const ringGeometry = new THREE.TorusGeometry(2.35, 0.03, 12, 120);
+    const ringGeometry = new THREE.TorusGeometry(2.35, 0.024, 14, 120);
     geometries.push(ringGeometry);
     const ringMaterial = new THREE.MeshBasicMaterial({
-      color: new THREE.Color('#22d3ee'),
+      color: new THREE.Color('#38bdf8'),
       transparent: true,
-      opacity: 0.35,
+      opacity: 0.22,
     });
     materials.push(ringMaterial);
     const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
     ringMesh.rotation.x = Math.PI / 2.4;
     rootGroup.add(ringMesh);
 
-    const wireGeometry = new THREE.WireframeGeometry(new THREE.SphereGeometry(1.56, 20, 16));
-    geometries.push(wireGeometry);
-    const wireMaterial = new THREE.LineBasicMaterial({
-      color: new THREE.Color('#a855f7'),
-      transparent: true,
-      opacity: 0.18,
-    });
-    materials.push(wireMaterial);
-    const wireMesh = new THREE.LineSegments(wireGeometry, wireMaterial);
-    rootGroup.add(wireMesh);
-
     const starGeometry = new THREE.BufferGeometry();
-    const starCount = 180;
+    const starCount = 140;
     const starPositions = new Float32Array(starCount * 3);
     const starSizes = new Float32Array(starCount);
     const starColors = new Float32Array(starCount * 3);
@@ -495,28 +495,26 @@ export const HeroOrb: React.FC<HeroOrbProps> = ({ className = '' }) => {
       };
     });
 
-    const ambientLight = new THREE.AmbientLight('#f8fbff', 1.6);
-    const hemiLight = new THREE.HemisphereLight('#ecf4ff', '#0b163a', 1.05);
+    const ambientLight = new THREE.AmbientLight('#f8fbff', 1.1);
+    const hemiLight = new THREE.HemisphereLight('#ecf4ff', '#0b163a', 0.9);
 
-    const keyLight = new THREE.PointLight('#d3ecff', 3.9, 0, 2);
-    keyLight.position.set(4.2, 4.4, 6.4);
-    keyLight.castShadow = true;
-    keyLight.shadow.mapSize.set(1024, 1024);
+    const keyLight = new THREE.PointLight('#d3ecff', 3.2, 0, 1.6);
+    keyLight.position.set(4.2, 4.4, 6);
 
-    const rimLight = new THREE.PointLight('#7ad8ff', 2.2, 0, 2);
-    rimLight.position.set(-4.6, -2.8, -3.6);
+    const rimLight = new THREE.PointLight('#7ad8ff', 1.8, 0, 1.6);
+    rimLight.position.set(-4.6, -2.4, -3.2);
     rimLight.castShadow = false;
 
-    const fillLight = new THREE.DirectionalLight('#f5f9ff', 1.65);
-    fillLight.position.set(-2.8, 3.6, 4.8);
+    const fillLight = new THREE.DirectionalLight('#f5f9ff', 1.4);
+    fillLight.position.set(-2.6, 3.2, 4.6);
 
-    const frontLight = new THREE.DirectionalLight('#e0ebff', 1.1);
+    const frontLight = new THREE.DirectionalLight('#e0ebff', 0.9);
     frontLight.position.set(0.4, 1.6, 5.4);
 
-    const surfaceLight = new THREE.SpotLight('#d6e6ff', 1.25, 18, Math.PI / 6, 0.45, 1.05);
-    surfaceLight.position.set(2.5, 2.7, 4.9);
+    const surfaceLight = new THREE.SpotLight('#d6e6ff', 1.1, 18, Math.PI / 6, 0.45, 1.05);
+    surfaceLight.position.set(2.4, 2.8, 4.7);
     surfaceLight.target = earthMesh;
-    const auroraLight = new THREE.PointLight('#f5c8ff', 1.4, 12, 2);
+    const auroraLight = new THREE.PointLight('#f5c8ff', 1.2, 12, 1.8);
     auroraLight.position.set(0.2, 3.4, -1);
 
     scene.add(ambientLight, hemiLight, keyLight, rimLight, fillLight, frontLight, surfaceLight, surfaceLight.target, auroraLight);
@@ -642,13 +640,3 @@ export const HeroOrb: React.FC<HeroOrbProps> = ({ className = '' }) => {
 
   return <div ref={containerRef} className={`relative h-full w-full ${className}`} data-cursor="pointer" />;
 };
-
-
-
-
-
-
-
-
-
-
