@@ -1,4 +1,4 @@
-﻿import { useEffect } from 'react';
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { Navigation } from './components/navigation/Navigation';
 import { CustomCursor } from './components/ui/CustomCursor';
@@ -11,6 +11,7 @@ import { ContactPage } from './pages/ContactPage';
 import { AdminPage } from './pages/AdminPage';
 import { useSmoothScroll } from './hooks/useSmoothScroll';
 import { SpaceBackdrop } from './components/visuals/SpaceBackdrop';
+import { usePerformanceMode } from './hooks/usePerformanceMode';
 
 const scrollToId = (sectionId?: string | null) => {
   if (!sectionId) return;
@@ -63,14 +64,18 @@ const ScrollManager = () => {
 };
 
 export default function App() {
-  useSmoothScroll();
+  const { isLowPower, shouldReduceMotion } = usePerformanceMode();
+  const smoothScrollEnabled = !isLowPower && !shouldReduceMotion;
+  const cursorEnabled = !isLowPower && !shouldReduceMotion;
+
+  useSmoothScroll(undefined, smoothScrollEnabled);
 
   return (
     <Router>
       <ScrollManager />
-      <div className="min-h-screen relative overflow-hidden text-white">
-        <SpaceBackdrop className="opacity-90" />
-        <CustomCursor />
+      <div className="relative min-h-screen overflow-hidden text-white">
+        <SpaceBackdrop className="opacity-90" lowPower={isLowPower} />
+        <CustomCursor enabled={cursorEnabled} />
         <Navigation />
         <main className="page-transition">
           <Routes>

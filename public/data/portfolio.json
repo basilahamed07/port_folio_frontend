@@ -1,0 +1,129 @@
+﻿{
+  "profile": {
+    "id": "1",
+    "name": "Nova Carter",
+    "title": "Mission Systems Architect",
+    "bio": "I choreograph starship-grade interfaces, guiding crews through realtime telemetry and cinematic combat simulations.",
+    "email": "comms@novacarter.io",
+    "location": "New Avalon Station",
+    "avatar_url": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&q=80",
+    "created_at": "2025-01-01T00:00:00Z",
+    "updated_at": "2025-01-01T00:00:00Z"
+  },
+  "skills": {
+    "title": "Systems mastery",
+    "description": "Each capability below fuels the mission dashboards, combat sims, and telemetry loops I deliver.",
+    "items": [
+      { "id": "skill-1", "name": "Three.js combat simulations" },
+      { "id": "skill-2", "name": "Framer Motion choreography" },
+      { "id": "skill-3", "name": "Supabase ops mesh" },
+      { "id": "skill-4", "name": "React orchestration" },
+      { "id": "skill-5", "name": "TailwindCSS systems" },
+      { "id": "skill-6", "name": "TypeScript" }
+    ]
+  },
+  "experiences": [
+    {
+      "id": "1",
+      "role": "Chief Interaction Officer",
+      "company": "Lumen Fleet",
+      "duration": "2023 - Present",
+      "description": "Command the design of multi-ship dashboards synchronising drones, pilots, and command decks across deep-space sorties.",
+      "technologies": ["React", "Three.js", "GSAP", "Supabase", "Node.js", "TailwindCSS"],
+      "logo_url": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=96&q=80",
+      "order_index": 1,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "2",
+      "role": "Mission Control Lead",
+      "company": "Orbital IX",
+      "duration": "2021 - 2023",
+      "description": "Built adaptive HUDs for combat pilots, weaving sensor fusion, predictive guidance, and holographic comms.",
+      "technologies": ["TypeScript", "WebGL", "GraphQL", "Docker", "AWS"],
+      "logo_url": "https://images.unsplash.com/photo-1521120413309-42bd8185e6f5?auto=format&fit=crop&w=96&q=80",
+      "order_index": 2,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "3",
+      "role": "Principal UX Engineer",
+      "company": "Synapse Forge",
+      "duration": "2019 - 2021",
+      "description": "Engineered collaborative fabrication tools that streamed telemetry from orbital yards to ground crews in realtime.",
+      "technologies": ["React", "Next.js", "D3.js", "PostgreSQL"],
+      "logo_url": "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=96&q=80",
+      "order_index": 3,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  ],
+  "education": [
+    {
+      "id": "1",
+      "school_name": "Academy of Stellar Navigation",
+      "degree": "M.S. Mission Systems Engineering",
+      "duration": "2017 - 2019",
+      "description": "Focused on adaptive guidance, telemetry orchestration, and pilot experience research.",
+      "type": "education",
+      "logo_url": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=96&q=80",
+      "order_index": 1,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "2",
+      "school_name": "Nova Core Institute",
+      "degree": "B.S. Human-Computer Symbiosis",
+      "duration": "2013 - 2017",
+      "description": "Explored immersive visualization, spatial interaction, and systems choreography.",
+      "type": "education",
+      "logo_url": "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=96&q=80",
+      "order_index": 2,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "3",
+      "school_name": "EDCiOT",
+      "degree": "EDCiOT Tactical Interface Certification",
+      "duration": "2024",
+      "description": "Certified in building resilient, crew-first experiences for orbital deployments.",
+      "type": "certification",
+      "logo_url": "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=96&q=80",
+      "order_index": 3,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  ],
+  "projects": [
+    {
+      "id": "1",
+      "title": "Aegis Command",
+      "description": "Fleet operations console blending combat dashboards, AI briefings, and live nebula reconnaissance feeds.",
+      "technologies": ["React", "Three.js", "Supabase", "TailwindCSS"],
+      "live_url": "https://aegis-command.example.com",
+      "github_url": "https://github.com/nova/aegis-command",
+      "image_url": null,
+      "featured": true,
+      "order_index": 1,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "2",
+      "title": "Stellar Cartographer",
+      "description": "Procedural galaxy mapper that streams stellar data and renders hyperspace corridors in realtime.",
+      "technologies": ["React", "d3.js", "Mapbox", "Node.js"],
+      "live_url": "https://stellar-cartographer.example.com",
+      "github_url": "https://github.com/nova/stellar-cartographer",
+      "image_url": null,
+      "featured": false,
+      "order_index": 2,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  ]
+}

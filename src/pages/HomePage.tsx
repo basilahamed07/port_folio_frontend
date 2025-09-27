@@ -2,36 +2,36 @@ import { useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useProfile, useExperiences, useEducation, useProjects, useSkills } from '../hooks/usePortfolioData';
 import { HeroOrb } from '../components/animations/HeroOrb';
-import { useProfile, useExperiences, useEducation, useProjects } from '../hooks/usePortfolioData';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const stats = [
   {
-    label: 'Years crafting immersive products',
-    value: '5+',
-    description: 'Designing cinematic interactions across web and native.',
+    label: 'Deep-space missions shipped',
+    value: '32',
+    description: 'Command modules and immersive ops rooms launched with cinematic UX.',
   },
   {
-    label: 'Across shipped launches',
-    value: '28',
-    description: 'From SaaS platforms to motion-rich experiential microsites.',
+    label: 'Live telemetry uptime',
+    value: '99.99%',
+    description: 'Redundant pipelines keep mission dashboards glowing around the clock.',
   },
   {
-    label: 'Platforms humming at',
-    value: '99.9%',
-    description: 'Reliability engineered with resilient automation and observability.',
+    label: 'Realtime data streams',
+    value: '74',
+    description: 'Sensor, satellite, and crew feeds braided into one control surface.',
   },
   {
-    label: 'Ecosystems explored',
+    label: 'Systems in active rotation',
     value: '12',
-    description: 'React, Three.js, GSAP, Supabase, Node, Tailwind, Framer Motion.',
+    description: 'React, Three.js, GSAP, Supabase, Tailwind, and more interlinked.',
   },
 ];
 
-const featureWords = ['Interactive', 'Motion-first', 'Human', 'Playable'];
+const featureWords = ['Interstellar', 'Mission-ready', 'Combat-simulated', 'Adaptive'];
 
 const sectionVariant = {
   initial: { opacity: 0, y: 40 },
@@ -51,67 +51,90 @@ export const HomePage = () => {
   const { experiences, loading: experienceLoading } = useExperiences();
   const { education, loading: educationLoading } = useEducation();
   const { projects, loading: projectsLoading } = useProjects();
+  const { skillsSection, loading: skillsLoading } = useSkills();
   const pageRef = useRef<HTMLDivElement>(null);
 
-  const loading = profileLoading || experienceLoading || educationLoading || projectsLoading;
+  const loading =
+    profileLoading || experienceLoading || educationLoading || projectsLoading || skillsLoading;
 
-  const techPillars = useMemo(
-    () => ['React', 'TypeScript', 'Three.js', 'GSAP', 'Node.js', 'Supabase', 'TailwindCSS', 'Framer Motion'],
-    []
+  const orderedExperiences = useMemo(() => {
+    return [...experiences].sort((a, b) => {
+      const aIndex = a.order_index ?? 0;
+      const bIndex = b.order_index ?? 0;
+      return aIndex - bIndex;
+    });
+  }, [experiences]);
+
+  const educationTimeline = useMemo(() => {
+    return [...education].sort((a, b) => {
+      const aIndex = a.order_index ?? 0;
+      const bIndex = b.order_index ?? 0;
+      return aIndex - bIndex;
+    });
+  }, [education]);
+
+  const formalEducation = useMemo(
+    () => educationTimeline.filter((item) => item.type === 'education'),
+    [educationTimeline]
+  );
+  const certifications = useMemo(
+    () => educationTimeline.filter((item) => item.type === 'certification'),
+    [educationTimeline]
   );
 
-  const topExperiences = useMemo(() => experiences.slice(0, 3), [experiences]);
-  const formalEducation = useMemo(() => education.filter((item) => item.type === 'education'), [education]);
-  const certifications = useMemo(() => education.filter((item) => item.type === 'certification'), [education]);
-  const highlightedCertification = useMemo(() => {
-    if (certifications.length === 0) return null;
-
-    const descriptor = certifications.find((cert) =>
-      `${cert.degree} ${cert.school_name}`.toLowerCase().includes('edciot')
-    );
-
-    return descriptor ?? certifications[0];
-  }, [certifications]);
-  const remainingCertifications = useMemo(() => {
-    if (!highlightedCertification) {
-      return certifications.slice(0, 4);
+  const latestCredential = useMemo(() => {
+    if (certifications.length > 0) {
+      return certifications[certifications.length - 1];
     }
+    if (formalEducation.length > 0) {
+      return formalEducation[formalEducation.length - 1];
+    }
+    return null;
+  }, [certifications, formalEducation]);
 
-    return certifications.filter((cert) => cert.id !== highlightedCertification.id).slice(0, 4);
-  }, [certifications, highlightedCertification]);
-  const certificationSpotlightLabel = useMemo(() => {
-    if (!highlightedCertification) return 'Certification spotlight';
-
-    const label = `${highlightedCertification.degree} ${highlightedCertification.school_name}`.toLowerCase();
-    return label.includes('edciot') ? 'EDCiOT certification spotlight' : 'Certification spotlight';
-  }, [highlightedCertification]);
-  const educationHighlights = useMemo(() => formalEducation.slice(0, 3), [formalEducation]);
   const educationMetrics = useMemo(
     () => [
       {
         label: 'Formal programs',
         value: formalEducation.length ? `${formalEducation.length}` : '0',
-        description: 'Deep academic foundations across computer science and UX.',
+        description: 'Ground control theory, HCI, and systems strategy for mission-critical builds.',
       },
       {
         label: 'Certifications',
-        value: certifications.length ? `${certifications.length}+` : 'In progress',
-        description: 'Cloud, architecture, and product specialisations.',
+        value: certifications.length ? `${certifications.length}` : '0',
+        description: 'Flight software, spatial computing, and systems architecture credentials.',
       },
       {
         label: 'Latest credential',
-        value: highlightedCertification?.duration ?? 'Ongoing',
-        description: highlightedCertification?.school_name ?? 'Constant learner, always upskilling.',
+        value: latestCredential?.duration ?? 'Ongoing',
+        description: latestCredential?.school_name ?? 'Crew-ready, always logging new simulations and certifications.',
       },
     ],
-    [formalEducation, certifications, highlightedCertification]
+    [formalEducation.length, certifications.length, latestCredential]
   );
   const featuredProjects = useMemo(() => {
     const featured = projects.filter((project) => project.featured);
     return (featured.length > 0 ? featured : projects).slice(0, 3);
   }, [projects]);
 
+  const skillsItems = useMemo(() => skillsSection?.items ?? [], [skillsSection]);
+  const skillsTitle = skillsSection?.title ?? 'Skills arsenal';
+  const skillsDescription = skillsSection?.description ?? 'Capabilities powering each mission.';
+
   const contactEmail = profile?.email ?? 'hello@example.com';
+  const orbitLocation = profile?.location ? `Orbiting from ${profile.location}` : 'Orbiting Earth';
+  const getLogoUrl = (entity: { logo_url?: string | null } | Record<string, unknown>) => {
+    const logo = (entity as { logo_url?: string | null }).logo_url;
+    if (logo) return logo;
+    const image = (entity as { image_url?: string | null }).image_url;
+    return image ?? undefined;
+  };
+
+  const getInitial = (label?: string | null) => {
+    if (!label) return '�';
+    const trimmed = label.trim();
+    return trimmed ? trimmed.charAt(0).toUpperCase() : '�';
+  };
 
   useEffect(() => {
     if (loading) return;
@@ -169,13 +192,6 @@ export const HomePage = () => {
 
   return (
     <div ref={pageRef} className="relative min-h-screen overflow-hidden text-white">
-
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[#03021a]/60" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(30,64,175,0.45)_0%,_rgba(12,10,25,0.12)_45%,_rgba(2,6,23,0.18)_75%,_rgba(2,6,23,0)_100%)] opacity-70" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,_rgba(76,5,124,0.28)_0%,_rgba(18,2,40,0.1)_55%,_rgba(2,6,23,0)_100%)] mix-blend-screen opacity-60" />
-      </div>
-
       <section id="hero" className="relative z-10 flex min-h-screen w-full items-center px-4 py-16 sm:px-6 lg:px-12 xl:px-16">
         <div className="grid w-full grid-cols-1 gap-12 sm:gap-16 lg:grid-cols-[minmax(0,_1.05fr)_minmax(0,_0.95fr)] lg:items-center xl:gap-20 2xl:gap-24">
           <div className="flex flex-col justify-center space-y-9 text-center lg:text-left">
@@ -184,7 +200,7 @@ export const HomePage = () => {
               data-cursor="text"
             >
               <span className="h-2 w-2 rounded-full bg-indigo-400" />
-              {profile?.location ?? 'Global'} Based
+              {orbitLocation}
             </span>
 
             <motion.h1
@@ -209,7 +225,7 @@ export const HomePage = () => {
               data-cursor="text"
             >
               {profile?.bio ??
-                'I design and ship playful, performant interfaces that feel alive. My work stitches together storytelling, motion, and immersive technology so every interaction feels intentional.'}
+                'I craft mission control systems that feel like cinematic space operas. From holographic telemetry to responsive combat dashboards, every interaction is tuned for clarity under pressure.'}
             </motion.p>
 
             <div className="hero-cta flex flex-col items-center gap-4 sm:flex-row sm:justify-center lg:justify-start">
@@ -221,7 +237,7 @@ export const HomePage = () => {
                 data-cursor="pointer"
                 onClick={() => handleScrollToSection('projects')}
               >
-                Explore Featured Work
+                Launch Mission Log
                 <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/20 transition-all group-hover:translate-x-1 group-hover:bg-white/30">
                   ?
                 </span>
@@ -235,7 +251,7 @@ export const HomePage = () => {
                 data-cursor="pointer"
                 onClick={() => handleScrollToSection('contact')}
               >
-                Let&apos;s Collaborate
+                Open Comms Channel
                 <span className="text-xl">?</span>
               </motion.button>
             </div>
@@ -266,11 +282,11 @@ export const HomePage = () => {
                 initial={{ opacity: 0, x: 40 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, amount: 0.5 }}
-                transition={{ duration: 0.8, ease: 'easeOut' }}
+                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
                 data-cursor="pointer"
               >
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-200">Realtime</p>
-                <p className="mt-2 text-sm text-indigo-100/90">GSAP-synced motion with tactile hover responses.</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-200">Telemetry sync</p>
+                <p className="mt-2 text-sm text-indigo-100/90">GSAP-synced thrusters and HUD cues reacting to pointer flight paths.</p>
               </motion.div>
 
               <motion.div
@@ -278,11 +294,11 @@ export const HomePage = () => {
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.5 }}
-                transition={{ duration: 0.8, ease: 'easeOut', delay: 0.1 }}
+                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
                 data-cursor="pointer"
               >
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-200">Three.js</p>
-                <p className="mt-2 text-sm text-indigo-100/90">Earth, twin satellites, and comet trails in orbit.</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-200">Three.js combat sim</p>
+                <p className="mt-2 text-sm text-indigo-100/90">Procedural starfighters, nebulae, and plasma trails flying in formation.</p>
               </motion.div>
             </div>
           </div>
@@ -295,44 +311,71 @@ export const HomePage = () => {
           initial="initial"
           whileInView="animate"
           viewport={{ once: true, amount: 0.4 }}
-          className="reveal-on-scroll grid w-full gap-12 rounded-[32px] border border-white/10 bg-white/5 p-8 backdrop-blur-2xl lg:grid-cols-[minmax(0,_1.2fr)_minmax(0,_0.8fr)] lg:p-10 xl:gap-14"
+          className="reveal-on-scroll grid w-full gap-10 rounded-[32px] border border-white/10 bg-white/5 p-8 backdrop-blur-2xl lg:grid-cols-[minmax(0,_0.9fr)_minmax(0,_1.1fr)] lg:p-10 xl:gap-16"
         >
-          <div className="space-y-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-200" data-cursor="text">
-              About
-            </p>
-            <h2 className="text-3xl font-semibold text-white sm:text-4xl" data-cursor="text">
-              Thoughtful interfaces that feel like play, engineered for performance.
-            </h2>
-            <p className="max-w-2xl text-base text-indigo-100/90 sm:text-lg" data-cursor="text">
-              {profile?.bio ??
-                'I blend brand, experience, and engineering to craft interactive systems that scale. From motion art direction to full-stack delivery, I focus on bridging imagination with reliable, testable code.'}
-            </p>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {techPillars.map((tech) => (
-                <motion.div
-                  key={tech}
-                  className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-sm font-semibold text-indigo-100 backdrop-blur-xl"
-                  whileHover={{ scale: 1.02 }}
-                  data-cursor="pointer"
-                >
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white">
-                    {tech[0]}
-                  </span>
-                  {tech}
-                </motion.div>
-              ))}
+          <div className="relative flex items-center justify-center">
+            <div className="relative aspect-square w-full max-w-[420px] overflow-hidden rounded-[36px] border border-white/10 bg-gradient-to-br from-indigo-900/50 via-purple-900/40 to-sky-900/40 shadow-2xl shadow-indigo-950/40">
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(56,189,248,0.35),transparent_65%)]" />
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_75%,rgba(167,139,250,0.35),transparent_70%)]" />
+              {profile?.avatar_url ? (
+                <img
+                  src={profile.avatar_url}
+                  alt={profile?.name ?? 'Portrait'}
+                  loading="lazy"
+                  className="relative h-full w-full object-cover"
+                />
+              ) : (
+                <div className="relative flex h-full w-full items-center justify-center text-sm font-semibold text-indigo-100/70">
+                  Upload your portrait
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="space-y-6 rounded-3xl border border-white/10 bg-gradient-to-br from-indigo-500/25 via-purple-500/20 to-sky-500/25 p-8 text-indigo-50 shadow-2xl shadow-indigo-900/30" data-cursor="text">
-            <h3 className="text-lg font-semibold uppercase tracking-[0.2em] text-indigo-200">Creative ethos</h3>
-            <ul className="space-y-4 text-sm leading-relaxed">
-              <li>- Motion is messaging: every transition tells part of the story.</li>
-              <li>- Joy and speed coexist. Sub-100ms feedback keeps delight intact.</li>
-              <li>- Accessibility and polish walk together-clarity elevates beauty.</li>
-              <li>- Collaboration beats silos; I partner across product, design, and engineering.</li>
+          <div className="flex flex-col justify-center space-y-6 text-left">
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-200">About</p>
+            <h2 className="text-3xl font-semibold text-white sm:text-4xl">{profile?.name ?? 'Crewmate'}</h2>
+            <p className="text-sm leading-relaxed text-indigo-100/80 sm:text-base">{profile?.bio ?? 'I build interaction systems that keep crews confident while missions push the boundaries.'}</p>
+            <div className="flex flex-wrap gap-3 text-xs font-semibold uppercase tracking-[0.3em] text-indigo-200">
+              <span>{profile?.title ?? 'Systems Architect'}</span>
+              <span className="text-indigo-100/70">{orbitLocation}</span>
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+
+      <section id="skills" className={sectionShellClass}>
+        <motion.div
+          variants={sectionVariant}
+          initial="initial"
+          whileInView="animate"
+          viewport={{ once: true, amount: 0.4 }}
+          className="reveal-on-scroll grid w-full gap-10 rounded-[32px] border border-white/10 bg-white/5 p-8 backdrop-blur-2xl lg:grid-cols-[minmax(0,_1.05fr)_minmax(0,_0.95fr)] lg:p-10 xl:gap-14"
+        >
+          <div className="space-y-6">
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-200" data-cursor="text">{skillsTitle}</p>
+            <h2 className="text-3xl font-semibold text-white sm:text-4xl" data-cursor="text">{profile?.title ?? 'Mission systems specialist'}</h2>
+            <ul className="grid gap-3 sm:grid-cols-2" data-cursor="text">
+              {skillsItems.map((skill) => (
+                <motion.li
+                  key={skill.id ?? skill.name}
+                  className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-indigo-100 backdrop-blur-xl"
+                  whileHover={{ x: 6 }}
+                >
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-tr from-indigo-500 to-sky-500 text-xs font-bold text-white">
+                    {getInitial(skill.name)}
+                  </span>
+                  {skill.name}
+                </motion.li>
+              ))}
             </ul>
+          </div>
+
+          <div className="space-y-6 rounded-3xl border border-white/10 bg-gradient-to-br from-indigo-500/20 via-purple-500/15 to-sky-500/20 p-8 text-indigo-50 shadow-2xl shadow-indigo-900/30" data-cursor="text">
+            <h3 className="text-lg font-semibold uppercase tracking-[0.2em] text-indigo-200">Capability summary</h3>
+            <p className="text-sm leading-relaxed text-indigo-100/80">{skillsDescription}</p>
+            <p className="text-sm leading-relaxed text-indigo-100/80">{profile?.bio ?? 'I build interaction systems that keep crews confident while the mission heats up.'}</p>
           </div>
         </motion.div>
       </section>
@@ -343,44 +386,80 @@ export const HomePage = () => {
           initial="initial"
           whileInView="animate"
           viewport={{ once: true, amount: 0.4 }}
-          className="reveal-on-scroll w-full"
+          className="reveal-on-scroll w-full space-y-12"
         >
-          <div className="flex flex-col gap-4 pb-10 text-left lg:flex-row lg:items-end lg:justify-between">
+          <div className="flex flex-col gap-4 text-left lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-200">Experience</p>
-              <h2 className="text-3xl font-semibold text-white sm:text-4xl">Leading products from prototype to planet-scale</h2>
+              <h2 className="text-3xl font-semibold text-white sm:text-4xl">Commanding product crews from briefing to deorbit</h2>
             </div>
             <p className="max-w-xl text-sm text-indigo-100/80">
-              A snapshot of recent roles where I guided teams through invention, iteration, and launch.
+              Every assignment is logged so you can trace how each squad moved from concept to live deployment.
             </p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:gap-8 2xl:gap-10">
-            {topExperiences.map((experience) => (
-              <motion.article
-                key={experience.id}
-                className="group flex h-full flex-col rounded-3xl border border-white/10 bg-white/5 p-6 text-left backdrop-blur-xl"
-                whileHover={cardHover.whileHover}
-                whileTap={cardHover.whileTap}
-                data-cursor="text"
-              >
-                <div className="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-indigo-200">
-                  <span>{experience.company}</span>
-                  <span>{experience.duration}</span>
-                </div>
-                <h3 className="mt-4 text-xl font-semibold text-white">{experience.role}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-indigo-100/80 line-clamp-4">
-                  {experience.description}
-                </p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {experience.technologies.slice(0, 5).map((tech) => (
-                    <span key={tech} className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-indigo-100/80">
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              </motion.article>
-            ))}
+          <div className="relative mx-auto flex w-full max-w-5xl flex-col gap-10 lg:grid lg:grid-cols-[minmax(0,_1fr)_3.5rem_minmax(0,_1fr)] lg:gap-12">
+            <span className="pointer-events-none absolute left-1/2 top-0 hidden h-full w-px -translate-x-1/2 bg-gradient-to-b from-sky-400/70 via-white/10 to-transparent lg:block" />
+
+            {orderedExperiences.map((experience, index) => {
+              const alignLeft = index % 2 === 0;
+              const logoUrl = getLogoUrl(experience as Record<string, unknown>);
+              const initial = getInitial(experience.company ?? experience.role);
+
+              return (
+                <motion.article
+                  key={experience.id ?? index}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.55 }}
+                  transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                  className={`relative rounded-3xl border border-white/10 bg-white/5 p-6 text-left shadow-2xl shadow-indigo-950/20 backdrop-blur-xl sm:p-7 ${
+                    alignLeft
+                      ? 'lg:col-start-1 lg:col-end-2 lg:ml-0 lg:mr-8'
+                      : 'lg:col-start-3 lg:col-end-4 lg:mr-0 lg:ml-8'
+                  }`}
+                  data-cursor="text"
+                >
+                  <span
+                    className={`hidden lg:flex absolute top-8 h-3 w-3 items-center justify-center rounded-full bg-sky-300 shadow-[0_0_12px_rgba(56,189,248,0.7)] ${
+                      alignLeft ? 'right-[-1.75rem]' : 'left-[-1.75rem]'
+                    }`}
+                  />
+
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
+                    <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/10">
+                      {logoUrl ? (
+                        <img src={logoUrl} alt={`${experience.company} logo`} loading="lazy" className="h-full w-full object-cover" />
+                      ) : (
+                        <span className="text-sm font-semibold text-white">{initial}</span>
+                      )}
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.3em] text-indigo-200">
+                        <span>{experience.company}</span>
+                        <span className="text-indigo-100/70">{experience.duration}</span>
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-semibold text-white">{experience.role}</h3>
+                        <p className="mt-2 text-sm leading-relaxed text-indigo-100/80">{experience.description}</p>
+                      </div>
+                      {experience.technologies?.length ? (
+                        <div className="flex flex-wrap gap-2">
+                          {experience.technologies.map((tech) => (
+                            <span
+                              key={`${experience.id ?? index}-${tech}`}
+                              className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-indigo-100/80"
+                            >
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                </motion.article>
+              );
+            })}
           </div>
         </motion.div>
       </section>
@@ -391,103 +470,113 @@ export const HomePage = () => {
           initial="initial"
           whileInView="animate"
           viewport={{ once: true, amount: 0.4 }}
-          className="reveal-on-scroll w-full space-y-8"
+          className="reveal-on-scroll w-full space-y-10"
         >
-          <div className="relative overflow-hidden rounded-[36px] border border-white/10 bg-white/5 p-10 backdrop-blur-2xl">
-            <div className="pointer-events-none absolute -top-32 left-[10%] h-64 w-64 rounded-full bg-indigo-500/20 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-40 right-0 h-80 w-80 rounded-full bg-purple-500/10 blur-3xl" />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-purple-500/10" />
-            <div className="relative z-10 grid gap-10 lg:grid-cols-[minmax(0,_0.9fr)_minmax(0,_1.1fr)]">
-              <div className="flex flex-col gap-8">
-                <div className="space-y-3">
-                  <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-200">Education & certifications</p>
-                  <h2 className="text-3xl font-semibold text-white sm:text-4xl">Learning engineered for momentum</h2>
-                  <p className="max-w-xl text-sm text-indigo-100/80">
-                    A holistic blend of academic rigor and hands-on credentials that keeps my practice sharp, with annual focus on emerging IoT ecosystems and immersive product systems.
-                  </p>
-                </div>
+          <div className="space-y-4 text-left">
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-200">Training & credentials</p>
+            <h2 className="text-3xl font-semibold text-white sm:text-4xl">Training engineered for orbital velocity</h2>
+            <p className="max-w-2xl text-sm text-indigo-100/80">
+              Formal programs follow the timeline; certifications sit in a hover-ready dossier for quick inspection.
+            </p>
+          </div>
 
-                {highlightedCertification && (
-                  <div className="relative overflow-hidden rounded-3xl border border-indigo-400/40 bg-gradient-to-br from-indigo-600/30 via-purple-500/20 to-sky-500/20 p-6 shadow-[0_35px_60px_-15px_rgba(37,99,235,0.35)]">
-                    <div className="pointer-events-none absolute -right-20 top-1/2 h-40 w-40 -translate-y-1/2 rounded-full bg-white/10 blur-2xl" />
-                    <div className="relative z-10 space-y-3">
-                      <p className="text-xs font-semibold uppercase tracking-[0.4em] text-indigo-100">
-                        {certificationSpotlightLabel}
-                      </p>
-                      <h3 className="text-2xl font-semibold text-white">{highlightedCertification.degree}</h3>
-                      <p className="text-sm font-semibold text-indigo-100/90">
-                        {highlightedCertification.school_name} | {highlightedCertification.duration}
-                      </p>
-                      {highlightedCertification.description ? (
-                        <p className="text-sm text-indigo-100/80">
-                          {highlightedCertification.description}
-                        </p>
-                      ) : (
-                        <p className="text-sm text-indigo-100/80">
-                          A credential grounded in building resilient, human-first experiences.
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                <div className="grid gap-3 sm:grid-cols-3">
-                  {educationMetrics.map((metric) => (
-                    <div
-                      key={metric.label}
-                      className="rounded-2xl border border-white/10 bg-white/10 p-4 text-left"
-                    >
-                      <p className="text-2xl font-semibold text-white">{metric.value}</p>
-                      <p className="mt-1 text-xs font-semibold uppercase tracking-[0.25em] text-indigo-200">
-                        {metric.label}
-                      </p>
-                      <p className="mt-2 text-xs text-indigo-100/80">{metric.description}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <motion.a
-                  href="/education"
-                  className="inline-flex w-fit items-center gap-3 rounded-full border border-white/20 bg-white/10 px-6 py-3 text-sm font-semibold text-indigo-100 transition hover:border-indigo-400 hover:text-white"
-                  whileHover={{ scale: 1.04, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  data-cursor="pointer"
-                >
-                  View full learning path
-                  <span className="text-lg">&#8594;</span>
-                </motion.a>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {educationMetrics.map((metric) => (
+              <div key={metric.label} className="rounded-2xl border border-white/10 bg-white/10 p-4 text-left">
+                <p className="text-2xl font-semibold text-white">{metric.value}</p>
+                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.25em] text-indigo-200">{metric.label}</p>
+                <p className="mt-2 text-xs text-indigo-100/80">{metric.description}</p>
               </div>
+            ))}
+          </div>
 
-              <div className="grid gap-6">
-                <div className="rounded-3xl border border-white/10 bg-white/10 p-6">
-                  <p className="text-xs font-semibold uppercase tracking-[0.4em] text-indigo-200">Formal foundations</p>
-                  <div className="mt-5 space-y-5">
-                    {educationHighlights.map((item) => (
-                      <div key={item.id} className="rounded-2xl border border-white/5 bg-white/5 p-4">
-                        <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.3em] text-indigo-200">
-                          <span>{item.school_name}</span>
-                          <span>{item.duration}</span>
-                        </div>
-                        <h4 className="mt-3 text-base font-semibold text-white">{item.degree}</h4>
-                        <p className="mt-2 text-sm text-indigo-100/80 line-clamp-3">{item.description}</p>
+          <div className="grid gap-12 lg:grid-cols-[minmax(0,_0.55fr)_minmax(0,_0.45fr)]">
+            <div className="relative mt-6 space-y-10 lg:pl-10">
+              <div className="pointer-events-none absolute left-4 top-0 hidden h-full w-px bg-gradient-to-b from-indigo-400/60 via-white/15 to-transparent lg:block" />
+              {formalEducation.map((item, index) => {
+                const logoUrl = getLogoUrl(item as Record<string, unknown>);
+                const initial = getInitial(item.school_name ?? item.degree);
+
+                return (
+                  <motion.article
+                    key={item.id ?? index}
+                    initial={{ opacity: 0, y: 40 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.6 }}
+                    transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                    className="relative rounded-3xl border border-white/10 bg-white/5 p-6 pl-12 text-left shadow-xl shadow-indigo-900/25 backdrop-blur-xl sm:p-7"
+                    data-cursor="text"
+                  >
+                    <span className="absolute left-4 top-6 flex h-8 w-8 items-center justify-center">
+                      <span className="absolute h-8 w-8 rounded-full border border-indigo-300/40 bg-indigo-500/15 blur-md" />
+                      <span className="relative h-3 w-3 rounded-full bg-indigo-300 shadow-[0_0_12px_rgba(165,180,252,0.6)]" />
+                    </span>
+
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-6">
+                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/10">
+                        {logoUrl ? (
+                          <img src={logoUrl} alt={`${item.school_name} logo`} loading="lazy" className="h-full w-full object-cover" />
+                        ) : (
+                          <span className="text-sm font-semibold text-white">{initial}</span>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                </div>
-
-                {remainingCertifications.length > 0 && (
-                  <div className="rounded-3xl border border-indigo-400/30 bg-gradient-to-r from-indigo-600/10 via-purple-500/10 to-sky-500/10 p-6">
-                    <p className="text-xs font-semibold uppercase tracking-[0.4em] text-indigo-200">Certified specialisms</p>
-                    <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                      {remainingCertifications.map((cert) => (
-                        <div key={cert.id} className="rounded-2xl border border-white/10 bg-white/10 p-4">
-                          <p className="text-sm font-semibold text-white">{cert.degree}</p>
-                          <p className="mt-2 text-xs uppercase tracking-[0.3em] text-indigo-200">{cert.school_name}</p>
-                          <p className="mt-2 text-xs text-indigo-100/70">{cert.duration}</p>
+                      <div className="space-y-3">
+                        <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.3em] text-indigo-200">
+                          <span>Program</span>
+                          <span className="text-indigo-100/70">{item.duration}</span>
                         </div>
-                      ))}
+                        <div>
+                          <h3 className="text-lg font-semibold text-white">{item.degree}</h3>
+                          <p className="mt-2 text-sm text-indigo-100/80 leading-relaxed">{item.description}</p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  </motion.article>
+                );
+              })}
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold uppercase tracking-[0.25em] text-indigo-100">Certifications</h3>
+                <p className="mt-2 text-sm text-indigo-100/80">Hover a badge to surface the mission focus.</p>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {certifications.length ? (
+                  certifications.map((item, index) => {
+                    const logoUrl = getLogoUrl(item as Record<string, unknown>);
+                    const initial = getInitial(item.degree);
+                    return (
+                      <motion.div
+                        key={item.id ?? index}
+                        className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 px-5 py-6 backdrop-blur-xl transition-[transform,box-shadow] duration-300 hover:-translate-y-2 hover:shadow-[0_25px_55px_-18px_rgba(129,140,248,0.55)]"
+                        data-cursor="text"
+                        whileHover={{ scale: 1.01 }}
+                      >
+                        <div className="relative z-10 flex items-center gap-3">
+                          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/10">
+                            {logoUrl ? (
+                              <img src={logoUrl} alt={`${item.school_name} logo`} loading="lazy" className="h-full w-full object-cover" />
+                            ) : (
+                              <span className="text-sm font-semibold text-white">{initial}</span>
+                            )}
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-sm font-semibold text-white">{item.degree}</p>
+                            <p className="text-xs uppercase tracking-[0.3em] text-indigo-200">{item.school_name}</p>
+                            <p className="text-xs text-indigo-100/70">{item.duration}</p>
+                          </div>
+                        </div>
+                        {item.description ? (
+                          <div className="pointer-events-none absolute inset-x-0 bottom-0 translate-y-8 bg-gradient-to-t from-slate-950/85 via-slate-900/40 to-transparent opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                            <p className="px-5 pb-5 pt-6 text-left text-xs text-indigo-100/85">{item.description}</p>
+                          </div>
+                        ) : null}
+                      </motion.div>
+                    );
+                  })
+                ) : (
+                  <p className="text-xs text-indigo-100/60">No certifications logged yet.</p>
                 )}
               </div>
             </div>
@@ -504,11 +593,11 @@ export const HomePage = () => {
         >
           <div className="flex flex-col gap-4 pb-10 text-left lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-200">Projects</p>
-              <h2 className="text-3xl font-semibold text-white sm:text-4xl">A few immersive builds in orbit</h2>
+              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-200">Missions</p>
+              <h2 className="text-3xl font-semibold text-white sm:text-4xl">Highlighted operations across the fleet</h2>
             </div>
             <p className="max-w-xl text-sm text-indigo-100/80">
-              Blending generative visuals, data storytelling, and robust engineering into cohesive experiences.
+              From orbital simulators to planetary logistics dashboards, each mission fuses spectacle with reliability.
             </p>
           </div>
 
@@ -535,7 +624,7 @@ export const HomePage = () => {
                       className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-indigo-100 transition hover:border-indigo-400 hover:text-white"
                       data-cursor="pointer"
                     >
-                      Live Demo
+                      Mission Brief
                       <span>?</span>
                     </a>
                   )}
@@ -547,7 +636,7 @@ export const HomePage = () => {
                       className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-indigo-100 transition hover:border-indigo-400 hover:text-white"
                       data-cursor="pointer"
                     >
-                      GitHub
+                      Source Logs
                       <span>?</span>
                     </a>
                   )}
@@ -568,12 +657,12 @@ export const HomePage = () => {
         >
           <div className="absolute -top-12 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-white/10 blur-3xl" />
           <div className="relative space-y-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-200">Contact</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-200">Comm link</p>
             <h2 className="text-3xl font-bold text-white sm:text-4xl">
-              Let&apos;s build the next immersive story together
+              Open a secure channel for the next mission
             </h2>
             <p className="mx-auto max-w-2xl text-sm text-indigo-100/80 sm:text-base">
-              I love collaborating with teams who care about craft and delight. Tell me about your product, prototype, or idea-you&apos;ll get thoughtful options and practical next steps.
+              Bring me into your next mission and we'll plot flight paths, redundancies, and interaction models built for deep space ambitions.
             </p>
             <motion.a
               href={`mailto:${contactEmail}`}
@@ -591,3 +680,7 @@ export const HomePage = () => {
     </div>
   );
 };
+
+
+
+

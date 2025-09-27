@@ -66,7 +66,7 @@ export const ProjectsPage = () => {
           className="text-center mb-16"
           initial={{ y: -50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         >
           <h1
             className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-indigo-300 via-sky-400 to-purple-400 bg-clip-text text-transparent"
@@ -85,7 +85,7 @@ export const ProjectsPage = () => {
           className="flex justify-center mb-12"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         >
           <div className="rounded-full border border-white/10 bg-slate-900/60 p-1 backdrop-blur-md shadow-[0_25px_60px_-25px_rgba(56,189,248,0.25)]">
             <button
@@ -140,7 +140,7 @@ export const ProjectsPage = () => {
                     <motion.div
                       className="flex h-20 w-20 items-center justify-center rounded-lg bg-gradient-to-r from-indigo-500 via-sky-500 to-purple-500 text-3xl font-bold text-white"
                       whileHover={{ rotate: 360 }}
-                      transition={{ duration: 0.6 }}
+                      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                     >
                       🚀
                     </motion.div>
@@ -154,7 +154,7 @@ export const ProjectsPage = () => {
                       animate={{ 
                         boxShadow: ['0 0 0 0 rgba(245, 158, 11, 0.7)', '0 0 0 10px rgba(245, 158, 11, 0)'],
                       }}
-                      transition={{ duration: 2, repeat: Infinity }}
+                      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                     >
                       ⭐ Featured
                     </motion.span>
@@ -331,3 +331,5 @@ export const ProjectsPage = () => {
     </div>
   );
 };
+
+

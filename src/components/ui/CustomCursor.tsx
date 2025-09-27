@@ -4,7 +4,11 @@ import { motion } from 'framer-motion';
 const INTERACTIVE_SELECTOR = 'a, button, [role="button"], input, textarea, select, [data-cursor="pointer"]';
 const TEXT_SELECTOR = '[data-cursor="text"], p, h1, h2, h3, h4, h5, h6, .cursor-text';
 
-export const CustomCursor = () => {
+interface CustomCursorProps {
+  enabled?: boolean;
+}
+
+export const CustomCursor = ({ enabled = true }: CustomCursorProps) => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [cursorVariant, setCursorVariant] = useState<'default' | 'hover' | 'text' | 'press'>('default');
   const [isVisible, setIsVisible] = useState(false);
@@ -60,6 +64,17 @@ export const CustomCursor = () => {
   }, []);
 
   useEffect(() => {
+    if (!enabled) {
+      document.body.classList.remove('custom-cursor-enabled');
+      pendingPointer.current = null;
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      setIsVisible(false);
+      return;
+    }
+
     if (isMobile) {
       document.body.classList.remove('custom-cursor-enabled');
       return;
@@ -131,7 +146,7 @@ export const CustomCursor = () => {
       pendingPointer.current = null;
       document.body.classList.remove('custom-cursor-enabled');
     };
-  }, [isMobile, processPointerMove, resolveVariant]);
+  }, [enabled, isMobile, processPointerMove, resolveVariant]);
 
 
 
@@ -227,7 +242,7 @@ export const CustomCursor = () => {
     press: { x: 22, y: 22 },
   } as const;
 
-  if (isMobile || !isVisible) return null;
+  if (!enabled || isMobile || !isVisible) return null;
 
   const activeOffset = offsetMap[cursorVariant] ?? offsetMap.default;
   const offsetX = activeOffset.x;
@@ -289,5 +304,9 @@ export const CustomCursor = () => {
     </>
   );
 };
+
+
+
+
 
 

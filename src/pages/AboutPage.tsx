@@ -77,7 +77,7 @@ export const AboutPage = () => {
           className="text-center mb-16"
           initial={{ y: -50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         >
           <h1 
             className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent"
@@ -102,7 +102,7 @@ export const AboutPage = () => {
                   <motion.div
                     className="w-32 h-32 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white text-4xl font-bold"
                     whileHover={{ scale: 1.1, rotate: 5 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                   >
                     {profile.name.charAt(0)}
                   </motion.div>
@@ -128,7 +128,7 @@ export const AboutPage = () => {
                 className="text-3xl font-bold text-white mb-6"
                 data-cursor="text"
                 whileHover={{ x: 10 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
               >
                 My Story
               </motion.h2>
@@ -138,7 +138,7 @@ export const AboutPage = () => {
                 data-cursor="text"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
               >
                 {profile.bio}
               </motion.p>
@@ -156,7 +156,7 @@ export const AboutPage = () => {
                   className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border border-white/10 rounded-xl p-6 text-center"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.6 + index * 0.1 }}
+                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                   whileHover={{ 
                     scale: 1.05, 
                     borderColor: 'rgba(99, 102, 241, 0.5)' 
@@ -181,7 +181,7 @@ export const AboutPage = () => {
               className="pt-6"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 1 }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             >
               <motion.button
                 className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full font-semibold hover:shadow-lg hover:shadow-indigo-500/25 transition-all duration-300"
@@ -198,3 +198,5 @@ export const AboutPage = () => {
     </div>
   );
 };
+
+

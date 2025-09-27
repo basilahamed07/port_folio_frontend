@@ -1,248 +1,853 @@
+// import { useEffect, useRef } from 'react';
+// import * as THREE from 'three';
+
+// interface SpaceBackdropProps {
+//   className?: string;
+//   starDensity?: number;
+//   lowPower?: boolean;
+// }
+
+// interface CombatShip {
+//   group: THREE.Group;
+//   nose: THREE.Object3D;
+//   thruster: THREE.Mesh;
+//   pathRadius: number;
+//   verticalRadius: number;
+//   height: number;
+//   speed: number;
+//   offset: number;
+//   rollIntensity: number;
+//   weaponCooldown: number;
+//   weaponTimer: number;
+//   color: THREE.Color;
+// }
+
+// interface LaserBolt {
+//   mesh: THREE.Mesh;
+//   velocity: THREE.Vector3;
+//   life: number;
+//   maxLife: number;
+// }
+
+// interface NebulaCloud {
+//   mesh: THREE.Mesh;
+//   rotationSpeed: number;
+//   floatOffset: number;
+// }
+
+// const createSpriteTexture = (size: number, colorStops: Array<{ offset: number; color: string }>) => {
+//   const canvas = document.createElement('canvas');
+//   canvas.width = size;
+//   canvas.height = size;
+//   const ctx = canvas.getContext('2d');
+//   if (!ctx) {
+//     return new THREE.Texture();
+//   }
+
+//   const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+//   colorStops.forEach(({ offset, color }) => gradient.addColorStop(offset, color));
+//   ctx.fillStyle = gradient;
+//   ctx.fillRect(0, 0, size, size);
+
+//   const texture = new THREE.CanvasTexture(canvas);
+//   texture.colorSpace = THREE.SRGBColorSpace;
+//   texture.needsUpdate = true;
+//   return texture;
+// };
+
+// const createShip = (color: THREE.Color, geometries: THREE.BufferGeometry[], materials: THREE.Material[]): CombatShip => {
+//   const ship = new THREE.Group();
+
+//   const hullGeometry = new THREE.ConeGeometry(0.45, 3.4, 14, 1, true);
+//   hullGeometry.rotateX(Math.PI / 2);
+//   geometries.push(hullGeometry);
+
+//   const hullMaterial = new THREE.MeshStandardMaterial({
+//     color,
+//     roughness: 0.32,
+//     metalness: 0.6,
+//     emissive: color.clone().multiplyScalar(0.2),
+//     emissiveIntensity: 0.8,
+//   });
+//   materials.push(hullMaterial);
+
+//   const hull = new THREE.Mesh(hullGeometry, hullMaterial);
+//   hull.castShadow = false;
+//   hull.receiveShadow = false;
+//   ship.add(hull);
+
+//   const wingGeometry = new THREE.BoxGeometry(2.8, 0.08, 0.9);
+//   wingGeometry.translate(0, 0.12, -0.6);
+//   wingGeometry.rotateX(Math.PI / 2.4);
+//   geometries.push(wingGeometry);
+
+//   const wingMaterial = new THREE.MeshStandardMaterial({
+//     color: color.clone().multiplyScalar(0.6),
+//     roughness: 0.4,
+//     metalness: 0.65,
+//     emissive: color.clone().multiplyScalar(0.12),
+//   });
+//   materials.push(wingMaterial);
+
+//   const wings = new THREE.Mesh(wingGeometry, wingMaterial);
+//   wings.castShadow = false;
+//   ship.add(wings);
+
+//   const stabilizerGeometry = new THREE.BoxGeometry(0.26, 1.4, 0.08);
+//   stabilizerGeometry.translate(0, 0.65, -1.2);
+//   geometries.push(stabilizerGeometry);
+
+//   const stabilizer = new THREE.Mesh(stabilizerGeometry, wingMaterial);
+//   stabilizer.castShadow = false;
+//   ship.add(stabilizer);
+
+//   const thrusterGeometry = new THREE.CylinderGeometry(0.24, 0.36, 0.64, 16, 1, true);
+//   thrusterGeometry.rotateZ(Math.PI / 2);
+//   thrusterGeometry.translate(0, 0, 1.5);
+//   geometries.push(thrusterGeometry);
+
+//   const thrusterMaterial = new THREE.MeshBasicMaterial({
+//     color: color.clone().offsetHSL(0, -0.08, 0.18),
+//     transparent: true,
+//     opacity: 0.85,
+//     blending: THREE.AdditiveBlending,
+//     depthWrite: false,
+//   });
+//   materials.push(thrusterMaterial);
+
+//   const thruster = new THREE.Mesh(thrusterGeometry, thrusterMaterial);
+//   thruster.castShadow = false;
+//   ship.add(thruster);
+
+//   const engineGlowGeometry = new THREE.PlaneGeometry(0.9, 0.9);
+//   geometries.push(engineGlowGeometry);
+
+//   const engineGlowMaterial = new THREE.MeshBasicMaterial({
+//     color: color.clone().offsetHSL(0.08, 0.15, 0.3),
+//     transparent: true,
+//     opacity: 0.85,
+//     blending: THREE.AdditiveBlending,
+//     side: THREE.DoubleSide,
+//     depthWrite: false,
+//   });
+//   materials.push(engineGlowMaterial);
+
+//   const engineGlow = new THREE.Mesh(engineGlowGeometry, engineGlowMaterial);
+//   engineGlow.rotation.x = Math.PI / 2;
+//   engineGlow.position.set(0, -0.04, 1.55);
+//   ship.add(engineGlow);
+
+//   const nose = new THREE.Object3D();
+//   nose.position.set(0, 0, -1.7);
+//   ship.add(nose);
+
+//   ship.scale.setScalar(0.92 + Math.random() * 0.12);
+
+//   return {
+//     group: ship,
+//     nose,
+//     thruster,
+//     pathRadius: 8 + Math.random() * 6,
+//     verticalRadius: 2.2 + Math.random() * 1.4,
+//     height: -1.5 + Math.random() * 3,
+//     speed: 0.18 + Math.random() * 0.12,
+//     offset: Math.random() * Math.PI * 2,
+//     rollIntensity: 0.25 + Math.random() * 0.3,
+//     weaponCooldown: 1.6 + Math.random() * 1.4,
+//     weaponTimer: Math.random() * 1.5,
+//     color,
+//   };
+// };
+
+// const createNebulaTexture = () => {
+//   const canvas = document.createElement('canvas');
+//   canvas.width = 512;
+//   canvas.height = 512;
+//   const ctx = canvas.getContext('2d');
+//   if (!ctx) {
+//     return new THREE.Texture();
+//   }
+
+//   const gradient = ctx.createRadialGradient(256, 256, 40, 256, 256, 240);
+//   gradient.addColorStop(0, 'rgba(120, 166, 255, 0.85)');
+//   gradient.addColorStop(0.35, 'rgba(98, 78, 216, 0.55)');
+//   gradient.addColorStop(0.72, 'rgba(15, 23, 42, 0.0)');
+
+//   ctx.fillStyle = gradient;
+//   ctx.fillRect(0, 0, 512, 512);
+
+//   const texture = new THREE.CanvasTexture(canvas);
+//   texture.colorSpace = THREE.SRGBColorSpace;
+//   texture.needsUpdate = true;
+//   return texture;
+// };
+
+// export const SpaceBackdrop: React.FC<SpaceBackdropProps> = ({ className = '', starDensity = 1, lowPower = false }) => {
+//   const containerRef = useRef<HTMLDivElement>(null);
+//   const animationRef = useRef<number>();
+
+//   useEffect(() => {
+//     if (lowPower) {
+//       return;
+//     }
+
+//     const container = containerRef.current;
+//     if (!container) {
+//       return;
+//     }
+
+//     const scene = new THREE.Scene();
+//     scene.background = new THREE.Color(0x010107);
+//     scene.fog = new THREE.FogExp2('#050c1d', 0.022);
+
+//     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+//     renderer.outputColorSpace = THREE.SRGBColorSpace;
+//     renderer.toneMapping = THREE.ACESFilmicToneMapping;
+//     renderer.toneMappingExposure = 1.25;
+//     renderer.setPixelRatio(Math.min(window.devicePixelRatio ?? 1, 1.8));
+//     renderer.setSize(container.clientWidth, container.clientHeight, false);
+//     renderer.setClearColor(0x000000, 0);
+//     container.appendChild(renderer.domElement);
+
+//     const camera = new THREE.PerspectiveCamera(52, container.clientWidth / container.clientHeight, 0.1, 160);
+//     camera.position.set(0, 3.8, 18);
+//     camera.lookAt(0, 0, 0);
+
+//     const clock = new THREE.Clock();
+//     const geometries: THREE.BufferGeometry[] = [];
+//     const materials: THREE.Material[] = [];
+//     const textures: THREE.Texture[] = [];
+
+//     const ambientLight = new THREE.AmbientLight(0x16213f, 0.65);
+//     const hemi = new THREE.HemisphereLight(0x4261ff, 0x050509, 0.75);
+//     const keyLight = new THREE.DirectionalLight(0x7fa3ff, 0.8);
+//     keyLight.position.set(-8, 12, 18);
+//     const rimLight = new THREE.DirectionalLight(0x3bf0ff, 0.5);
+//     rimLight.position.set(10, -6, -16);
+
+//     scene.add(ambientLight, hemi, keyLight, rimLight);
+
+//     const pointer = { x: 0, y: 0 };
+
+//     const starTexture = createSpriteTexture(256, [
+//       { offset: 0, color: 'rgba(255,255,255,1)' },
+//       { offset: 0.35, color: 'rgba(179,207,255,0.9)' },
+//       { offset: 1, color: 'rgba(5,12,29,0)' },
+//     ]);
+//     starTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+//     textures.push(starTexture);
+
+//     const starLayers = [] as THREE.Points[];
+//     const baseStars = Math.round(2200 * starDensity);
+//     for (let layer = 0; layer < 3; layer += 1) {
+//       const starCount = Math.round(baseStars * (0.45 + layer * 0.35));
+//       const positions = new Float32Array(starCount * 3);
+//       const colors = new Float32Array(starCount * 3);
+
+//       for (let i = 0; i < starCount; i += 1) {
+//         const radius = 80 + Math.random() * 120;
+//         const angle = Math.random() * Math.PI * 2;
+//         const y = (Math.random() - 0.5) * 80;
+//         positions[i * 3] = Math.cos(angle) * radius;
+//         positions[i * 3 + 1] = y;
+//         positions[i * 3 + 2] = Math.sin(angle) * radius;
+
+//         const tint = 0.75 + Math.random() * 0.25;
+//         colors[i * 3] = 0.7 + Math.random() * 0.3;
+//         colors[i * 3 + 1] = tint;
+//         colors[i * 3 + 2] = 1;
+//       }
+
+//       const geometry = new THREE.BufferGeometry();
+//       geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+//       geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+//       geometries.push(geometry);
+
+//       const material = new THREE.PointsMaterial({
+//         size: 0.8 + layer * 0.6,
+//         map: starTexture,
+//         depthWrite: false,
+//         transparent: true,
+//         alphaTest: 0.01,
+//         vertexColors: true,
+//         blending: THREE.AdditiveBlending,
+//         sizeAttenuation: true,
+//         opacity: 0.65 + layer * 0.18,
+//       });
+//       materials.push(material);
+
+//       const stars = new THREE.Points(geometry, material);
+//       stars.rotation.z = Math.random() * Math.PI;
+//       scene.add(stars);
+//       starLayers.push(stars);
+//     }
+
+//     const nebulaTexture = createNebulaTexture();
+//     nebulaTexture.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
+//     textures.push(nebulaTexture);
+
+//     const nebulaMaterial = new THREE.MeshBasicMaterial({
+//       map: nebulaTexture,
+//       transparent: true,
+//       opacity: 0.65,
+//       blending: THREE.AdditiveBlending,
+//       depthWrite: false,
+//     });
+//     materials.push(nebulaMaterial);
+
+//     const nebulaClouds: NebulaCloud[] = [];
+//     const nebulaPositions = [
+//       { x: -18, y: 6, z: -24, scale: 26, rotationSpeed: 0.0006 },
+//       { x: 22, y: -4, z: -28, scale: 32, rotationSpeed: -0.0004 },
+//       { x: -6, y: -10, z: -22, scale: 22, rotationSpeed: 0.0008 },
+//     ];
+
+//     nebulaPositions.forEach((config, index) => {
+//       const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), nebulaMaterial.clone());
+//       geometries.push(mesh.geometry);
+//       materials.push(mesh.material as THREE.Material);
+//       mesh.position.set(config.x, config.y, config.z);
+//       mesh.scale.setScalar(config.scale);
+//       mesh.rotation.y = Math.PI / 2 + Math.random() * 0.6;
+//       mesh.rotation.z = Math.random() * Math.PI;
+//       scene.add(mesh);
+//       nebulaClouds.push({ mesh, rotationSpeed: config.rotationSpeed, floatOffset: index * Math.PI * 0.4 });
+//     });
+
+//     const ships: CombatShip[] = [];
+//     const shipColors = [0x7dd3fc, 0xc084fc, 0x60a5fa, 0xf97316, 0x38bdf8].map((hex) => new THREE.Color(hex));
+//     const shipCount = 6;
+
+//     for (let i = 0; i < shipCount; i += 1) {
+//       const color = shipColors[i % shipColors.length].clone().offsetHSL((Math.random() - 0.5) * 0.15, (Math.random() - 0.5) * 0.1, (Math.random() - 0.5) * 0.1);
+//       const ship = createShip(color, geometries, materials);
+//       ship.group.position.set(0, 0, -10);
+//       scene.add(ship.group);
+//       ships.push(ship);
+//     }
+
+//     const laserGeometry = new THREE.CapsuleGeometry(0.08, 1.8, 6, 10);
+//     geometries.push(laserGeometry);
+//     const lasers: LaserBolt[] = [];
+
+//     const addLaser = (origin: THREE.Vector3, direction: THREE.Vector3, color: THREE.Color) => {
+//       const material = new THREE.MeshBasicMaterial({
+//         color,
+//         transparent: true,
+//         opacity: 0.95,
+//         depthWrite: false,
+//         blending: THREE.AdditiveBlending,
+//       });
+//       materials.push(material);
+//       const mesh = new THREE.Mesh(laserGeometry, material);
+//       mesh.position.copy(origin);
+//       mesh.lookAt(origin.clone().add(direction));
+//       scene.add(mesh);
+//       lasers.push({ mesh, velocity: direction.clone().multiplyScalar(24), life: 0, maxLife: 2.2 });
+//     };
+
+//     const tempVector = new THREE.Vector3();
+//     const targetVector = new THREE.Vector3();
+//     const originVector = new THREE.Vector3();
+
+//     const handlePointerMove = (event: PointerEvent) => {
+//       const { innerWidth, innerHeight } = window;
+//       pointer.x = (event.clientX / innerWidth - 0.5) * 2;
+//       pointer.y = (event.clientY / innerHeight - 0.5) * 2;
+//     };
+
+//     const handleResize = () => {
+//       const { clientWidth, clientHeight } = container;
+//       renderer.setSize(clientWidth, clientHeight, false);
+//       camera.aspect = clientWidth / clientHeight;
+//       camera.updateProjectionMatrix();
+//     };
+
+//     window.addEventListener('pointermove', handlePointerMove, { passive: true });
+//     window.addEventListener('resize', handleResize);
+
+//     const animate = () => {
+//       const delta = Math.min(clock.getDelta(), 0.05);
+//       const elapsed = clock.elapsedTime;
+
+//       camera.position.x += (pointer.x * 2.4 - camera.position.x * 0.08) * 0.12;
+//       camera.position.y += (pointer.y * -1.6 + 3.8 - camera.position.y) * 0.08;
+//       camera.lookAt(0, -0.2, 0);
+
+//       starLayers.forEach((layer, index) => {
+//         layer.rotation.y += 0.0006 + index * 0.0004;
+//         layer.rotation.x += 0.0002 * (index + 1);
+//       });
+
+//       nebulaClouds.forEach((cloud) => {
+//         cloud.mesh.rotation.z += cloud.rotationSpeed;
+//         cloud.mesh.position.y += Math.sin(elapsed * 0.2 + cloud.floatOffset) * 0.002;
+//       });
+
+//       ships.forEach((ship, idx) => {
+//         const angle = elapsed * ship.speed + ship.offset;
+//         const x = Math.cos(angle) * ship.pathRadius;
+//         const z = Math.sin(angle) * ship.pathRadius;
+//         const y = Math.sin(angle * 1.6) * ship.verticalRadius + ship.height;
+//         ship.group.position.set(x, y, z);
+
+//         const forward = tempVector.set(-Math.sin(angle), Math.cos(angle * 1.6) * ship.verticalRadius * 0.05, Math.cos(angle));
+//         forward.normalize();
+//         originVector.copy(ship.group.position);
+//         ship.group.lookAt(originVector.clone().add(forward));
+//         ship.group.rotateZ(Math.sin(elapsed * (0.8 + ship.rollIntensity) + ship.offset) * ship.rollIntensity);
+
+//         const thrusterMaterial = ship.thruster.material as THREE.MeshBasicMaterial;
+//         thrusterMaterial.opacity = 0.6 + Math.sin(elapsed * 12 + ship.offset) * 0.25;
+
+//         ship.weaponTimer -= delta;
+//         if (ship.weaponTimer <= 0 && ships.length > 1) {
+//           const targetIndex = (idx + 1 + Math.floor(Math.random() * (ships.length - 1))) % ships.length;
+//           const targetShip = ships[targetIndex];
+//           if (targetShip) {
+//             ship.nose.getWorldPosition(originVector);
+//             targetVector.subVectors(targetShip.group.position, originVector).normalize();
+//             const spread = 0.04 + Math.random() * 0.08;
+//             targetVector.x += (Math.random() - 0.5) * spread;
+//             targetVector.y += (Math.random() - 0.5) * spread;
+//             targetVector.z += (Math.random() - 0.5) * spread;
+//             targetVector.normalize();
+//             addLaser(originVector.clone(), targetVector, ship.color.clone().offsetHSL(0.05, 0.1, 0.1));
+//           }
+//           ship.weaponTimer = ship.weaponCooldown * (0.7 + Math.random() * 0.6);
+//         }
+//       });
+
+//       for (let i = lasers.length - 1; i >= 0; i -= 1) {
+//         const laser = lasers[i];
+//         laser.life += delta;
+//         laser.mesh.position.addScaledVector(laser.velocity, delta);
+//         const material = laser.mesh.material as THREE.MeshBasicMaterial;
+//         material.opacity = Math.max(0, 0.95 - laser.life / laser.maxLife);
+//         if (laser.life >= laser.maxLife) {
+//           scene.remove(laser.mesh);
+//           material.dispose();
+//           lasers.splice(i, 1);
+//         }
+//       }
+
+//       renderer.render(scene, camera);
+//       animationRef.current = requestAnimationFrame(animate);
+//     };
+
+//     handleResize();
+//     animationRef.current = requestAnimationFrame(animate);
+
+//     return () => {
+//       if (animationRef.current) {
+//         cancelAnimationFrame(animationRef.current);
+//       }
+//       window.removeEventListener('pointermove', handlePointerMove);
+//       window.removeEventListener('resize', handleResize);
+//       renderer.dispose();
+//       starLayers.forEach((layer) => {
+//         scene.remove(layer);
+//       });
+//       nebulaClouds.forEach((cloud) => scene.remove(cloud.mesh));
+//       ships.forEach((ship) => {
+//         scene.remove(ship.group);
+//       });
+//       lasers.forEach((laser) => {
+//         scene.remove(laser.mesh);
+//         (laser.mesh.material as THREE.Material).dispose();
+//       });
+//       geometries.forEach((geometry) => geometry.dispose());
+//       materials.forEach((material) => material.dispose());
+//       textures.forEach((texture) => texture.dispose());
+//       if (renderer.domElement.parentElement === container) {
+//         container.removeChild(renderer.domElement);
+//       }
+//     };
+//   }, [starDensity, lowPower]);
+
+//   return (
+//     <div className={`pointer-events-none fixed inset-0 -z-10 overflow-hidden ${className}`}>
+//       {lowPower ? (
+//         <>
+//           <div className="absolute inset-0 bg-gradient-to-bl from-slate-950 via-slate-900 to-indigo-950" />
+//           <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(59,130,246,0.35),transparent_55%)]" />
+//           <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_25%,rgba(147,51,234,0.28),transparent_60%)]" />
+//           <div className="absolute inset-y-0 left-1/3 w-px bg-gradient-to-b from-transparent via-white/30 to-transparent opacity-60" />
+//           <div className="absolute inset-y-0 left-2/3 w-px bg-gradient-to-b from-transparent via-sky-200/40 to-transparent opacity-40" />
+//         </>
+//       ) : (
+//         <div ref={containerRef} className="absolute inset-0" />
+//       )}
+//       <div className="absolute -top-[30vh] left-[-15vw] h-[70vh] w-[70vw] rounded-full bg-[radial-gradient(circle_at_center,rgba(79,70,229,0.35)_0%,rgba(30,64,175,0.12)_45%,rgba(2,6,23,0)_70%)] blur-3xl mix-blend-screen" />
+//       <div className="absolute top-[18vh] right-[-20vw] h-[80vh] w-[65vw] rounded-full bg-[radial-gradient(circle_at_center,rgba(236,72,153,0.35)_0%,rgba(124,58,237,0.15)_40%,rgba(2,6,23,0)_70%)] blur-3xl mix-blend-screen" />
+//       <div className="absolute bottom-[-25vh] left-[10vw] h-[55vh] w-[55vw] rounded-full bg-[radial-gradient(circle_at_center,rgba(45,212,191,0.3)_0%,rgba(6,182,212,0.12)_45%,rgba(2,6,23,0)_70%)] blur-[160px] mix-blend-screen" />
+//       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(15,23,42,0)_0%,rgba(2,6,23,0.65)_65%,rgba(2,6,23,0.92)_100%)]" />
+//     </div>
+//   );
+// };
+
+
+
 import { useEffect, useRef } from 'react';
+import * as THREE from 'three';
 
 interface SpaceBackdropProps {
   className?: string;
   starDensity?: number;
+  lowPower?: boolean;
 }
 
-interface Star {
-  x: number;
-  y: number;
-  z: number;
-  radius: number;
+interface CombatShip {
+  group: THREE.Group;
+  nose: THREE.Object3D;
+  thruster: THREE.Mesh;
+  pathRadius: number;
+  verticalRadius: number;
+  height: number;
   speed: number;
-  twinkleOffset: number;
+  offset: number;
+  rollIntensity: number;
+  weaponCooldown: number;
+  weaponTimer: number;
+  color: THREE.Color;
 }
 
-interface Comet {
-  angle: number;
-  radius: number;
-  speed: number;
-  tailLength: number;
-  thickness: number;
-  hue: number;
+interface LaserBolt {
+  mesh: THREE.Mesh;
+  velocity: THREE.Vector3;
+  life: number;
+  maxLife: number;
 }
 
-export const SpaceBackdrop: React.FC<SpaceBackdropProps> = ({ className = '', starDensity = 1 }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+const createSpriteTexture = (size: number, colorStops: Array<{ offset: number; color: string }>) => {
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    return new THREE.Texture();
+  }
+
+  const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+  colorStops.forEach(({ offset, color }) => gradient.addColorStop(offset, color));
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, size, size);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.needsUpdate = true;
+  return texture;
+};
+
+const createShip = (color: THREE.Color, geometries: THREE.BufferGeometry[], materials: THREE.Material[]): CombatShip => {
+  const ship = new THREE.Group();
+
+  const hullGeometry = new THREE.ConeGeometry(0.45, 3.4, 14, 1, true);
+  hullGeometry.rotateX(Math.PI / 2);
+  geometries.push(hullGeometry);
+
+  const hullMaterial = new THREE.MeshStandardMaterial({
+    color,
+    roughness: 0.32,
+    metalness: 0.6,
+    emissive: color.clone().multiplyScalar(0.2),
+    emissiveIntensity: 0.8,
+  });
+  materials.push(hullMaterial);
+
+  const hull = new THREE.Mesh(hullGeometry, hullMaterial);
+  hull.castShadow = false;
+  hull.receiveShadow = false;
+  ship.add(hull);
+
+  const wingGeometry = new THREE.BoxGeometry(2.8, 0.08, 0.9);
+  wingGeometry.translate(0, 0.12, -0.6);
+  wingGeometry.rotateX(Math.PI / 2.4);
+  geometries.push(wingGeometry);
+
+  const wingMaterial = new THREE.MeshStandardMaterial({
+    color: color.clone().multiplyScalar(0.6),
+    roughness: 0.4,
+    metalness: 0.65,
+    emissive: color.clone().multiplyScalar(0.12),
+  });
+  materials.push(wingMaterial);
+
+  const wings = new THREE.Mesh(wingGeometry, wingMaterial);
+  wings.castShadow = false;
+  ship.add(wings);
+
+  const stabilizerGeometry = new THREE.BoxGeometry(0.26, 1.4, 0.08);
+  stabilizerGeometry.translate(0, 0.65, -1.2);
+  geometries.push(stabilizerGeometry);
+
+  const stabilizer = new THREE.Mesh(stabilizerGeometry, wingMaterial);
+  stabilizer.castShadow = false;
+  ship.add(stabilizer);
+
+  const thrusterGeometry = new THREE.CylinderGeometry(0.24, 0.36, 0.64, 16, 1, true);
+  thrusterGeometry.rotateZ(Math.PI / 2);
+  thrusterGeometry.translate(0, 0, 1.5);
+  geometries.push(thrusterGeometry);
+
+  const thrusterMaterial = new THREE.MeshBasicMaterial({
+    color: color.clone().offsetHSL(0, -0.08, 0.18),
+    transparent: true,
+    opacity: 0.85,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
+  materials.push(thrusterMaterial);
+
+  const thruster = new THREE.Mesh(thrusterGeometry, thrusterMaterial);
+  thruster.castShadow = false;
+  ship.add(thruster);
+
+  const engineGlowGeometry = new THREE.PlaneGeometry(0.9, 0.9);
+  geometries.push(engineGlowGeometry);
+
+  const engineGlowMaterial = new THREE.MeshBasicMaterial({
+    color: color.clone().offsetHSL(0.08, 0.15, 0.3),
+    transparent: true,
+    opacity: 0.85,
+    blending: THREE.AdditiveBlending,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+  });
+  materials.push(engineGlowMaterial);
+
+  const engineGlow = new THREE.Mesh(engineGlowGeometry, engineGlowMaterial);
+  engineGlow.rotation.x = Math.PI / 2;
+  engineGlow.position.set(0, -0.04, 1.55);
+  ship.add(engineGlow);
+
+  const nose = new THREE.Object3D();
+  nose.position.set(0, 0, -1.7);
+  ship.add(nose);
+
+  ship.scale.setScalar(0.92 + Math.random() * 0.12);
+
+  return {
+    group: ship,
+    nose,
+    thruster,
+    pathRadius: 8 + Math.random() * 6,
+    verticalRadius: 2.2 + Math.random() * 1.4,
+    height: -1.5 + Math.random() * 3,
+    speed: 0.18 + Math.random() * 0.12,
+    offset: Math.random() * Math.PI * 2,
+    rollIntensity: 0.25 + Math.random() * 0.3,
+    weaponCooldown: 1.6 + Math.random() * 1.4,
+    weaponTimer: Math.random() * 1.5,
+    color,
+  };
+};
+
+const createNebulaTexture = () => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    return new THREE.Texture();
+  }
+
+  const gradient = ctx.createRadialGradient(256, 256, 40, 256, 256, 240);
+  gradient.addColorStop(0, 'rgba(120, 166, 255, 0.85)');
+  gradient.addColorStop(0.35, 'rgba(98, 78, 216, 0.55)');
+  gradient.addColorStop(0.72, 'rgba(15, 23, 42, 0.0)');
+
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, 512, 512);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.needsUpdate = true;
+  return texture;
+};
+
+export const SpaceBackdrop: React.FC<SpaceBackdropProps> = ({ className = '', starDensity = 1, lowPower = false }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number>();
-  const parallaxAnimationRef = useRef<number>();
-  const starsRef = useRef<Star[]>([]);
-  const pointerRef = useRef({ x: 0, y: 0 });
-  const parallaxRef = useRef({ x: 0, y: 0 });
-  const scrollRef = useRef(0);
-  const nebulaRefs = useRef<HTMLDivElement[]>([]);
-  const swirlRef = useRef<HTMLDivElement | null>(null);
-  const cometRef = useRef<Comet[]>([]);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (lowPower) {
+      return;
+    }
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    const container = containerRef.current;
+    if (!container) {
+      return;
+    }
 
-    let width = window.innerWidth;
-    let height = window.innerHeight;
-    const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x010107); // Space background (black)
+    scene.fog = new THREE.FogExp2('#050c1d', 0.022);
 
-    const createStars = () => {
-      const areaFactor = (width * height) / 5200;
-      const targetCount = Math.max(180, Math.min(520, Math.round(areaFactor * starDensity)));
-      const stars: Star[] = [];
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.25;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio ?? 1, 1.8));
+    renderer.setSize(container.clientWidth, container.clientHeight, false);
+    renderer.setClearColor(0x000000, 0);
+    container.appendChild(renderer.domElement);
 
-      for (let i = 0; i < targetCount; i += 1) {
-        const depth = Math.random();
-        stars.push({
-          x: Math.random() * width,
-          y: Math.random() * height,
-          z: depth,
-          radius: 0.8 + depth * 1.8,
-          speed: 0.18 + depth * 0.55,
-          twinkleOffset: Math.random() * Math.PI * 2,
-        });
+    const camera = new THREE.PerspectiveCamera(52, container.clientWidth / container.clientHeight, 0.1, 160);
+    camera.position.set(0, 3.8, 18);
+    camera.lookAt(0, 0, 0);
+
+    const clock = new THREE.Clock();
+    const geometries: THREE.BufferGeometry[] = [];
+    const materials: THREE.Material[] = [];
+    const textures: THREE.Texture[] = [];
+
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0x16213f, 0.65);
+    const hemi = new THREE.HemisphereLight(0x4261ff, 0x050509, 0.75);
+    const keyLight = new THREE.DirectionalLight(0x7fa3ff, 0.8);
+    keyLight.position.set(-8, 12, 18);
+    const rimLight = new THREE.DirectionalLight(0x3bf0ff, 0.5);
+    rimLight.position.set(10, -6, -16);
+
+    scene.add(ambientLight, hemi, keyLight, rimLight);
+
+    const pointer = { x: 0, y: 0 };
+
+    // Stars texture
+    const starTexture = createSpriteTexture(256, [
+      { offset: 0, color: 'rgba(255,255,255,1)' },
+      { offset: 0.35, color: 'rgba(179,207,255,0.9)' },
+      { offset: 1, color: 'rgba(5,12,29,0)' },
+    ]);
+    starTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    textures.push(starTexture);
+
+    const starLayers = [] as THREE.Points[];
+    const baseStars = Math.round(2200 * starDensity);
+    for (let layer = 0; layer < 3; layer += 1) {
+      const starCount = Math.round(baseStars * (0.45 + layer * 0.35));
+      const positions = new Float32Array(starCount * 3);
+      const colors = new Float32Array(starCount * 3);
+
+      for (let i = 0; i < starCount; i += 1) {
+        const radius = 80 + Math.random() * 120;
+        const angle = Math.random() * Math.PI * 2;
+        const y = (Math.random() - 0.5) * 80;
+        positions[i * 3] = Math.cos(angle) * radius;
+        positions[i * 3 + 1] = y;
+        positions[i * 3 + 2] = Math.sin(angle) * radius;
+
+        const tint = 0.75 + Math.random() * 0.25;
+        colors[i * 3] = 0.7 + Math.random() * 0.3;
+        colors[i * 3 + 1] = tint;
+        colors[i * 3 + 2] = 1;
       }
 
-      starsRef.current = stars;
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+      geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+      geometries.push(geometry);
+
+      const material = new THREE.PointsMaterial({
+        size: 0.8 + layer * 0.6,
+        map: starTexture,
+        depthWrite: false,
+        transparent: true,
+        alphaTest: 0.01,
+        vertexColors: true,
+        blending: THREE.AdditiveBlending,
+        sizeAttenuation: true,
+        opacity: 0.65 + layer * 0.18,
+      });
+      materials.push(material);
+
+      const stars = new THREE.Points(geometry, material);
+      stars.rotation.z = Math.random() * Math.PI;
+      scene.add(stars);
+      starLayers.push(stars);
+    }
+
+    // Ships setup
+    const ships: CombatShip[] = [];
+    const shipColors = [0x7dd3fc, 0xc084fc, 0x60a5fa, 0xf97316, 0x38bdf8].map((hex) => new THREE.Color(hex));
+    const shipCount = 6;
+
+    for (let i = 0; i < shipCount; i += 1) {
+      const color = shipColors[i % shipColors.length].clone().offsetHSL((Math.random() - 0.5) * 0.15, (Math.random() - 0.5) * 0.1, (Math.random() - 0.5) * 0.1);
+      const ship = createShip(color, geometries, materials);
+      ship.group.position.set(0, 0, -10);
+      scene.add(ship.group);
+      ships.push(ship);
+    }
+
+    // Handle resize
+    const handleResize = () => {
+      const { clientWidth, clientHeight } = container;
+      renderer.setSize(clientWidth, clientHeight, false);
+      camera.aspect = clientWidth / clientHeight;
+      camera.updateProjectionMatrix();
     };
 
-    const createComets = () => {
-      const count = Math.max(2, Math.round((width + height) / 900));
-      cometRef.current = Array.from({ length: count }).map((_, index) => ({
-        angle: Math.random() * Math.PI * 2,
-        radius: Math.max(width, height) * (0.4 + Math.random() * 0.4),
-        speed: 0.0006 + Math.random() * 0.0009,
-        tailLength: 90 + Math.random() * 140,
-        thickness: 0.6 + Math.random() * 0.9,
-        hue: 200 + index * 18 + Math.random() * 20,
-      }));
-    };
+    window.addEventListener('resize', handleResize);
 
-    const resize = () => {
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.style.width = '100vw';
-      canvas.style.height = '100vh';
-      canvas.width = width * pixelRatio;
-      canvas.height = height * pixelRatio;
-      ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-      createStars();
-      createComets();
-    };
+    // Animation loop
+    const animate = () => {
+      const delta = Math.min(clock.getDelta(), 0.05);
+      const elapsed = clock.elapsedTime;
 
-    const handlePointerMove = (event: PointerEvent) => {
-      const { innerWidth, innerHeight } = window;
-      const x = (event.clientX / innerWidth - 0.5) * 2;
-      const y = (event.clientY / innerHeight - 0.5) * 2;
-      pointerRef.current.x = x;
-      pointerRef.current.y = y;
-    };
+      // Camera update
+      camera.position.x += (pointer.x * 2.4 - camera.position.x * 0.08) * 0.12;
+      camera.position.y += (pointer.y * -1.6 + 3.8 - camera.position.y) * 0.08;
+      camera.lookAt(0, -0.2, 0);
 
-    const handleScroll = () => {
-      const progress = window.scrollY / Math.max(1, document.body.scrollHeight - window.innerHeight);
-      scrollRef.current = progress;
-    };
+      // Rotate stars
+      starLayers.forEach((layer, index) => {
+        layer.rotation.y += 0.0006 + index * 0.0004;
+        layer.rotation.x += 0.0002 * (index + 1);
+      });
 
-    const animate = (time: number) => {
-      parallaxRef.current.x += (pointerRef.current.x - parallaxRef.current.x) * 0.045;
-      parallaxRef.current.y += (pointerRef.current.y - parallaxRef.current.y) * 0.045;
+      // Move ships around
+      ships.forEach((ship, idx) => {
+        const angle = elapsed * ship.speed + ship.offset;
+        const x = Math.cos(angle) * ship.pathRadius;
+        const z = Math.sin(angle) * ship.pathRadius;
+        const y = Math.sin(angle * 1.6) * ship.verticalRadius + ship.height;
+        ship.group.position.set(x, y, z);
 
-      ctx.clearRect(0, 0, width, height);
-      ctx.fillStyle = '#020210';
-      ctx.fillRect(0, 0, width, height);
+        const forward = new THREE.Vector3().set(-Math.sin(angle), Math.cos(angle * 1.6) * ship.verticalRadius * 0.05, Math.cos(angle));
+        forward.normalize();
+        ship.group.lookAt(ship.group.position.clone().add(forward));
+        ship.group.rotateZ(Math.sin(elapsed * (0.8 + ship.rollIntensity) + ship.offset) * ship.rollIntensity);
+      });
 
-      const gradient = ctx.createRadialGradient(width * 0.42, height * 0.35, width * 0.06, width * 0.55, height * 0.7, width * 0.95);
-      gradient.addColorStop(0, 'rgba(120, 70, 255, 0.32)');
-      gradient.addColorStop(0.35, 'rgba(29, 78, 216, 0.28)');
-      gradient.addColorStop(0.68, 'rgba(12, 74, 110, 0.2)');
-      gradient.addColorStop(1, 'rgba(2, 6, 23, 0.12)');
-      ctx.fillStyle = gradient;
-      ctx.globalCompositeOperation = 'screen';
-      ctx.fillRect(0, 0, width, height);
-      ctx.globalCompositeOperation = 'lighter';
-
-      const comets = cometRef.current;
-      for (let i = 0; i < comets.length; i += 1) {
-        const comet = comets[i];
-        comet.angle += comet.speed * (i % 2 === 0 ? 1 : -1);
-        const orbitX = width * 0.5 + Math.cos(comet.angle) * comet.radius;
-        const orbitY = height * 0.5 + Math.sin(comet.angle) * comet.radius * 0.6;
-
-        const parallaxX = parallaxRef.current.x * 85;
-        const parallaxY = parallaxRef.current.y * 65;
-
-        const trailX = orbitX + parallaxX;
-        const trailY = orbitY + parallaxY + scrollRef.current * (120 + i * 45);
-
-        const tailVectorX = Math.cos(comet.angle + Math.PI) * comet.tailLength;
-        const tailVectorY = Math.sin(comet.angle + Math.PI) * comet.tailLength * 0.6;
-
-        const gradientTail = ctx.createLinearGradient(trailX, trailY, trailX + tailVectorX, trailY + tailVectorY);
-        gradientTail.addColorStop(0, `hsla(${comet.hue}, 95%, 78%, 0.9)`);
-        gradientTail.addColorStop(0.65, `hsla(${comet.hue + 24}, 90%, 70%, 0.35)`);
-        gradientTail.addColorStop(1, 'hsla(210, 95%, 80%, 0)');
-
-        ctx.strokeStyle = gradientTail;
-        ctx.lineWidth = comet.thickness;
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(trailX, trailY);
-        ctx.lineTo(trailX + tailVectorX, trailY + tailVectorY);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.fillStyle = `hsla(${comet.hue}, 100%, 88%, 0.95)`;
-        ctx.shadowBlur = 16;
-        ctx.shadowColor = `hsla(${comet.hue}, 100%, 75%, 0.8)`;
-        ctx.arc(trailX, trailY, comet.thickness * 2.2, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-      }
-
-      const stars = starsRef.current;
-      for (let i = 0; i < stars.length; i += 1) {
-        const star = stars[i];
-        const offsetX = parallaxRef.current.x * star.z * 26;
-        const offsetY = parallaxRef.current.y * star.z * 18 + scrollRef.current * star.z * 160;
-
-        star.y += star.speed;
-        if (star.y - star.radius > height) {
-          star.y = -star.radius;
-          star.x = Math.random() * width;
-        }
-
-        const twinkle = 0.6 + Math.sin(time * 0.0018 + star.twinkleOffset) * 0.5;
-        const alpha = 0.35 + twinkle * 0.55;
-
-        ctx.beginPath();
-        ctx.fillStyle = `rgba(${190 + Math.floor(star.z * 65)}, ${170 + Math.floor(star.z * 80)}, 255, ${alpha})`;
-        ctx.shadowBlur = 6 + star.z * 12;
-        ctx.shadowColor = `rgba(147, 197, 253, ${alpha})`;
-        ctx.arc(star.x + offsetX, star.y + offsetY, star.radius * (1.1 + star.z * 0.6), 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-      }
-
-      ctx.globalCompositeOperation = 'source-over';
+      renderer.render(scene, camera);
       animationRef.current = requestAnimationFrame(animate);
     };
 
-    const handleParallax = () => {
-      const scroll = scrollRef.current;
-      nebulaRefs.current.forEach((layer, index) => {
-        if (!layer) return;
-        const depth = 18 + index * 12;
-        const translateY = -scroll * depth;
-        const translateX = parallaxRef.current.x * (10 + index * 8);
-        layer.style.transform = `translate3d(${translateX}px, ${translateY}px, 0)`;
-      });
-
-      if (swirlRef.current) {
-        const rotation = scroll * 520 + parallaxRef.current.x * 40;
-        swirlRef.current.style.transform = `translate3d(-50%, -50%, 0) rotate(${rotation}deg)`;
-      }
-    };
-
-    const frameParallax = () => {
-      handleParallax();
-      parallaxAnimationRef.current = requestAnimationFrame(frameParallax);
-    };
-
-    resize();
-    handleScroll();
+    handleResize();
     animationRef.current = requestAnimationFrame(animate);
-    frameParallax();
-
-    window.addEventListener('resize', resize);
-    window.addEventListener('pointermove', handlePointerMove);
-    window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
-      window.removeEventListener('resize', resize);
-      window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('scroll', handleScroll);
-      if (animationRef.current) cancelAnimationFrame(animationRef.current);
-      if (parallaxAnimationRef.current) cancelAnimationFrame(parallaxAnimationRef.current);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+      window.removeEventListener('resize', handleResize);
+      renderer.dispose();
+      starLayers.forEach((layer) => {
+        scene.remove(layer);
+      });
+      ships.forEach((ship) => {
+        scene.remove(ship.group);
+      });
+      geometries.forEach((geometry) => geometry.dispose());
+      materials.forEach((material) => material.dispose());
+      textures.forEach((texture) => texture.dispose());
+      if (renderer.domElement.parentElement === container) {
+        container.removeChild(renderer.domElement);
+      }
     };
-  }, [starDensity]);
+  }, [starDensity, lowPower]);
 
-  const setNebulaRef = (index: number) => (element: HTMLDivElement | null) => {
-    if (!element) return;
-    nebulaRefs.current[index] = element;
-  };
-
-  return (
-    <div className={`pointer-events-none fixed inset-0 -z-10 overflow-hidden ${className}`}>
-      <canvas ref={canvasRef} className="absolute inset-0 opacity-75" />
-      <div ref={setNebulaRef(0)} className="absolute -top-[30vh] left-[-10vw] h-[70vh] w-[70vw] rounded-full bg-[radial-gradient(circle_at_center,rgba(79,70,229,0.32)_0%,rgba(30,64,175,0.08)_45%,rgba(2,6,23,0)_70%)] blur-3xl mix-blend-screen" />
-      <div ref={setNebulaRef(1)} className="absolute top-[20vh] right-[-15vw] h-[80vh] w-[65vw] rounded-full bg-[radial-gradient(circle_at_center,rgba(236,72,153,0.32)_0%,rgba(124,58,237,0.1)_40%,rgba(2,6,23,0)_70%)] blur-3xl mix-blend-screen" />
-      <div ref={setNebulaRef(2)} className="absolute bottom-[-25vh] left-[15vw] h-[50vh] w-[50vw] rounded-full bg-[radial-gradient(circle_at_center,rgba(45,212,191,0.28)_0%,rgba(6,182,212,0.08)_45%,rgba(2,6,23,0)_70%)] blur-[160px] mix-blend-screen" />
-      <div ref={setNebulaRef(3)} className="absolute top-1/2 left-1/2 h-[30vh] w-[30vh] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 bg-[radial-gradient(circle_at_center,rgba(148,163,255,0.25)_0%,rgba(2,6,23,0.2)_60%,rgba(2,6,23,0.95)_100%)] blur-lg opacity-80 mix-blend-screen" />
-      <div ref={setNebulaRef(4)} className="absolute top-[5vh] left-[55vw] h-[22vh] w-[22vh] -translate-x-1/2 rounded-full bg-[conic-gradient(from_90deg_at_center,rgba(14,165,233,0.5),rgba(147,51,234,0.15),rgba(14,116,144,0.5))] blur-2xl opacity-60 mix-blend-screen" />
-      <div
-        ref={swirlRef}
-        className="absolute top-1/2 left-1/2 h-[40vh] w-[40vh] -translate-x-1/2 -translate-y-1/2 rounded-full border border-sky-200/10 bg-[radial-gradient(circle_at_center,rgba(56,189,248,0.08)_0%,rgba(59,130,246,0.05)_60%,rgba(15,23,42,0.6)_100%)] blur-xl opacity-70 mix-blend-screen"
-      />
-    </div>
-  );
+  return <div ref={containerRef} className={`absolute inset-0 ${className}`} />;
 };

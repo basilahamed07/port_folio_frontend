@@ -1,4 +1,4 @@
-﻿import { useEffect } from 'react';
+import { useEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis, { LenisOptions } from 'lenis';
@@ -23,8 +23,14 @@ const defaultOptions: LenisOptions = {
   autoRaf: false,
 };
 
-export const useSmoothScroll = (options?: Partial<LenisOptions>) => {
+export const useSmoothScroll = (options?: Partial<LenisOptions>, enabled = true) => {
   useEffect(() => {
+    if (!enabled) {
+      ScrollTrigger.clearScrollMemory();
+      ScrollTrigger.refresh();
+      return;
+    }
+
     if (prefersReducedMotion()) {
       ScrollTrigger.clearScrollMemory();
       ScrollTrigger.refresh();
@@ -99,5 +105,5 @@ export const useSmoothScroll = (options?: Partial<LenisOptions>) => {
       ScrollTrigger.clearScrollMemory();
       ScrollTrigger.refresh();
     };
-  }, [options]);
+  }, [enabled, options]);
 };

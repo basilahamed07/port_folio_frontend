@@ -74,7 +74,7 @@ export const ExperiencePage = () => {
           className="text-center mb-16"
           initial={{ y: -50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         >
           <h1
             className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-indigo-300 via-sky-400 to-purple-400 bg-clip-text text-transparent"
@@ -101,14 +101,14 @@ export const ExperiencePage = () => {
                   index % 2 === 0 ? 'flex-row' : 'flex-row-reverse'
                 }`}
                 whileHover={{ scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
               >
                 {/* Timeline dot */}
                 <div className="absolute left-1/2 z-20 -translate-x-1/2 transform">
                   <motion.div
                     className="h-6 w-6 rounded-full border-4 border-slate-950 bg-gradient-to-r from-indigo-400 via-sky-400 to-purple-400 shadow-lg"
                     whileHover={{ scale: 1.5 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                    transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                   />
                 </div>
 
@@ -145,7 +145,7 @@ export const ExperiencePage = () => {
                             key={techIndex}
                             className="rounded-full border border-sky-400/40 bg-sky-400/15 px-3 py-1 text-sm font-medium text-sky-200"
                             whileHover={{ scale: 1.1, backgroundColor: 'rgba(56, 189, 248, 0.3)' }}
-                            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                           >
                             {tech}
                           </motion.span>
@@ -171,3 +171,5 @@ export const ExperiencePage = () => {
     </div>
   );
 };
+
+
