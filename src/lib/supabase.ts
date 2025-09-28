@@ -58,6 +58,7 @@ export type Database = {
           description: string;
           technologies: string[];
           order_index: number;
+          logo_url: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -73,6 +74,7 @@ export type Database = {
           description: string;
           type: 'education' | 'certification';
           order_index: number;
+          logo_url: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -112,5 +114,3 @@ export type Database = {
     };
   };
 };
-
-

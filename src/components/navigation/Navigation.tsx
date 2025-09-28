@@ -1,33 +1,61 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { MouseEvent as ReactMouseEvent, TouchEvent as ReactTouchEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import gsap from 'gsap';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const SECTION_NAV_ITEMS = [
   { name: 'Home', sectionId: 'hero' },
   { name: 'About', sectionId: 'about' },
   { name: 'Experience', sectionId: 'experience' },
   { name: 'Education', sectionId: 'education' },
-  { name: 'Projects', sectionId: 'projects' },
   { name: 'Contact', sectionId: 'contact' },
 ] as const;
 
 type SectionNavItem = typeof SECTION_NAV_ITEMS[number];
 type SectionId = SectionNavItem['sectionId'];
 
-const QUICK_LINKS: SectionNavItem[] = [
-  { name: 'Experience', sectionId: 'experience' },
-  { name: 'Projects', sectionId: 'projects' },
-  { name: 'Contact', sectionId: 'contact' },
-];
+const QUICK_LINKS: SectionNavItem[] = [];
+
+const OVERLAY_PANEL_CLASSES = [
+  'flex-1 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 opacity-90',
+  'hidden flex-1 bg-gradient-to-br from-indigo-900 via-purple-800 to-slate-950 opacity-90 sm:block',
+  'hidden flex-1 bg-gradient-to-br from-sky-900 via-indigo-950 to-slate-950 opacity-90 lg:block',
+] as const;
 
 export const Navigation = () => {
   const [activeSection, setActiveSection] = useState<SectionId>('hero');
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const overlayRef = useRef<HTMLDivElement | null>(null);
-  const overlayTimelineRef = useRef<gsap.core.Timeline | null>(null);
+  const overlayContentRef = useRef<HTMLDivElement | null>(null);
+
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
+  const handleBackdropInteraction = useCallback(
+    (target: EventTarget | null) => {
+      if (!menuOpen) return;
+      const content = overlayContentRef.current;
+      if (content && target instanceof Node && content.contains(target)) {
+        return;
+      }
+
+      closeMenu();
+    },
+    [closeMenu, menuOpen]
+  );
+
+  const handleOverlayMouseDown = useCallback(
+    (event: ReactMouseEvent<HTMLDivElement>) => {
+      handleBackdropInteraction(event.target);
+    },
+    [handleBackdropInteraction]
+  );
+
+  const handleOverlayTouchStart = useCallback(
+    (event: ReactTouchEvent<HTMLDivElement>) => {
+      handleBackdropInteraction(event.target);
+    },
+    [handleBackdropInteraction]
+  );
 
   const scrollToSection = (sectionId: SectionId) => {
     if (sectionId === 'hero') {
@@ -50,7 +78,7 @@ export const Navigation = () => {
   };
 
   const handleSectionClick = (sectionId: SectionId) => {
-    setMenuOpen(false);
+    closeMenu();
 
     if (location.pathname !== '/') {
       navigate('/', { state: { scrollTo: sectionId } });
@@ -96,59 +124,14 @@ export const Navigation = () => {
     };
   }, [location.pathname]);
 
-  useLayoutEffect(() => {
-    const overlay = overlayRef.current;
-    if (!overlay) return;
-
-    const ctx = gsap.context(() => {
-      const panels = overlay.querySelectorAll('[data-overlay-panel]');
-      const items = overlay.querySelectorAll('[data-overlay-item]');
-
-      const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } });
-      tl.set(overlay, { autoAlpha: 0 })
-        .fromTo(
-          overlay,
-          { autoAlpha: 0 },
-          { autoAlpha: 1, duration: 0.25 }
-        )
-        .fromTo(
-          panels,
-          { yPercent: 105 },
-          { yPercent: 0, duration: 0.6, stagger: 0.05 },
-          '<'
-        )
-        .from(
-          items,
-          { y: 50, opacity: 0, stagger: 0.08, duration: 0.45, ease: 'power3.out' },
-          '-=0.25'
-        );
-
-      overlayTimelineRef.current = tl;
-    }, overlay);
-
-    return () => ctx.revert();
-  }, []);
-
   useEffect(() => {
-    const tl = overlayTimelineRef.current;
-    const overlay = overlayRef.current;
-    if (!tl || !overlay) return;
-
     if (menuOpen) {
-      overlay.style.pointerEvents = 'auto';
       document.body.style.overflow = 'hidden';
-      tl.play();
     } else {
-      tl.reverse();
-      tl.eventCallback('onReverseComplete', () => {
-        overlay.style.pointerEvents = 'none';
-        document.body.style.removeProperty('overflow');
-        tl.eventCallback('onReverseComplete', null);
-      });
+      document.body.style.removeProperty('overflow');
     }
 
     return () => {
-      tl.eventCallback('onReverseComplete', null);
       document.body.style.removeProperty('overflow');
     };
   }, [menuOpen]);
@@ -192,10 +175,13 @@ export const Navigation = () => {
         <motion.button
           key={item.sectionId}
           type="button"
-          data-overlay-item
           onClick={() => handleSectionClick(item.sectionId)}
           className="text-3xl sm:text-4xl md:text-5xl font-semibold text-white/90 tracking-tight"
+          role="menuitem"
           whileHover={{ x: 8 }}
+          initial={{ y: 24, opacity: 0 }}
+          animate={{ y: 0, opacity: 1, transition: { duration: 0.45, delay: 0.45 + index * 0.08, ease: [0.22, 1, 0.36, 1] } }}
+          exit={{ y: 16, opacity: 0, transition: { duration: 0.2, ease: [0.4, 0, 0.2, 1] } }}
         >
           <span className="inline-flex items-center gap-3">
             <span className="h-2 w-2 rounded-full bg-indigo-300" />
@@ -274,58 +260,126 @@ export const Navigation = () => {
 
       <div className="h-16" />
 
-      <div
-        ref={overlayRef}
-        className="pointer-events-none fixed inset-0 z-50"
-        aria-hidden={!menuOpen}
-      >
-        <div className="absolute inset-0 flex">
-          <div data-overlay-panel className="flex-1 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
-          <div data-overlay-panel className="flex-1 bg-gradient-to-br from-indigo-900 via-purple-800 to-slate-950 hidden sm:block" />
-          <div data-overlay-panel className="flex-1 bg-gradient-to-br from-sky-800 via-indigo-900 to-slate-950 hidden lg:block" />
-        </div>
-
-        <div className="relative z-10 flex h-full flex-col items-center justify-center gap-12 px-6 text-center">
-          <motion.button
-            type="button"
-            onClick={() => setMenuOpen(false)}
-            className="absolute top-10 right-6 inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/15 bg-white/10 text-slate-100"
-            data-cursor="pointer"
-            whileHover={{ rotate: 90 }}
-            whileTap={{ scale: 0.92 }}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            key="navigation-overlay"
+            className="fixed inset-0 z-50"
+            onMouseDown={handleOverlayMouseDown}
+            onTouchStart={handleOverlayTouchStart}
+            aria-hidden={!menuOpen}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] } }}
+            exit={{ opacity: 0, transition: { duration: 0.25, ease: [0.4, 0, 0.2, 1] } }}
           >
-            <span className="sr-only">Close navigation</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M6 6l12 12M6 18L18 6" strokeLinecap="round" />
-            </svg>
-          </motion.button>
-
-          <div className="flex flex-col items-center gap-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.6em] text-indigo-200">Navigation</p>
-            <div className="flex flex-col items-center gap-6 text-left">
-              {overlayNavItems}
+            <div className="absolute inset-0 overflow-hidden">
+              <motion.div
+                className="absolute inset-0 bg-slate-950/88 backdrop-blur-[140px]"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1, transition: { duration: 0.35 } }}
+                exit={{ opacity: 0, transition: { duration: 0.2 } }}
+              />
+              <div className="absolute inset-0 flex">
+                {OVERLAY_PANEL_CLASSES.map((panelClass, index) => (
+                  <motion.div
+                    key={panelClass}
+                    className={panelClass}
+                    initial={{ y: '105%' }}
+                    animate={{ y: 0, transition: { duration: 0.8, delay: 0.1 + index * 0.08, ease: [0.19, 1, 0.22, 1] } }}
+                    exit={{ y: '105%', transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] } }}
+                  />
+                ))}
+              </div>
+              <motion.div
+                className="pointer-events-none absolute -left-24 top-6 h-[46vh] w-[46vh] rounded-full bg-[radial-gradient(circle_at_center,_rgba(99,102,241,0.45),rgba(15,23,42,0))] blur-3xl"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1, transition: { duration: 0.65, delay: 0.25, ease: [0.22, 1, 0.36, 1] } }}
+                exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.25 } }}
+              />
+              <motion.div
+                className="pointer-events-none absolute right-[-18%] bottom-[-10%] h-[58vh] w-[58vh] rounded-full bg-[radial-gradient(circle_at_center,_rgba(56,189,248,0.4),rgba(15,23,42,0))] blur-[140px]"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1, transition: { duration: 0.65, delay: 0.28, ease: [0.22, 1, 0.36, 1] } }}
+                exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.25 } }}
+              />
+              <motion.div
+                className="pointer-events-none absolute left-1/2 top-1/2 h-[44vh] w-[44vh] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,_rgba(236,72,153,0.28),rgba(15,23,42,0))] blur-[160px]"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1, transition: { duration: 0.65, delay: 0.32, ease: [0.22, 1, 0.36, 1] } }}
+                exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.25 } }}
+              />
             </div>
-          </div>
 
-          <div className="flex flex-col items-center gap-2 text-xs font-semibold uppercase tracking-[0.4em] text-indigo-200">
-            <p>Connect</p>
-            <div className="flex gap-3 text-sm tracking-[0.3em] text-indigo-100/80">
-              <a href="mailto:comms@novacarter.io" className="hover:text-white" data-cursor="pointer">
-                Email
-              </a>
-              <span className="opacity-40">/</span>
-              <a href="https://github.com/nova" className="hover:text-white" data-cursor="pointer" target="_blank" rel="noreferrer">
-                GitHub
-              </a>
-              <span className="opacity-40">/</span>
-              <a href="https://www.linkedin.com" className="hover:text-white" data-cursor="pointer" target="_blank" rel="noreferrer">
-                LinkedIn
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
+            <motion.div
+              ref={overlayContentRef}
+              className="relative z-10 flex h-full flex-col items-center justify-center gap-14 px-6 text-center"
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1, transition: { duration: 0.35, delay: 0.2, ease: [0.22, 1, 0.36, 1] } }}
+              exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.25, ease: [0.4, 0, 0.2, 1] } }}
+            >
+              <motion.button
+                type="button"
+                onClick={closeMenu}
+                className="absolute top-10 right-6 inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/15 bg-white/10 text-slate-100"
+                data-cursor="pointer"
+                whileHover={{ rotate: 90 }}
+                whileTap={{ scale: 0.92 }}
+                initial={{ opacity: 0, rotate: -35 }}
+                animate={{ opacity: 1, rotate: 0, transition: { duration: 0.4, delay: 0.35 } }}
+                exit={{ opacity: 0, rotate: -20, transition: { duration: 0.2 } }}
+              >
+                <span className="sr-only">Close navigation</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M6 6l12 12M6 18L18 6" strokeLinecap="round" />
+                </svg>
+              </motion.button>
+
+              <motion.div
+                className="flex flex-col items-center gap-8"
+                role="menu"
+                aria-label="Primary"
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0, transition: { duration: 0.4, delay: 0.3 } }}
+                exit={{ opacity: 0, y: 16, transition: { duration: 0.2 } }}
+              >
+                <motion.p
+                  className="text-xs font-semibold uppercase tracking-[0.6em] text-indigo-200"
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0, transition: { duration: 0.4, delay: 0.32 } }}
+                  exit={{ opacity: 0, y: 12, transition: { duration: 0.2 } }}
+                >
+                  Navigation
+                </motion.p>
+                <div className="flex flex-col items-center gap-6 text-left">
+                  {overlayNavItems}
+                </div>
+              </motion.div>
+
+              <motion.div
+                className="flex flex-col items-center gap-2 text-xs font-semibold uppercase tracking-[0.4em] text-indigo-200"
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0, transition: { duration: 0.4, delay: 0.38 } }}
+                exit={{ opacity: 0, y: 16, transition: { duration: 0.2 } }}
+              >
+                <p>Connect</p>
+                <div className="flex gap-3 text-sm tracking-[0.3em] text-indigo-100/80">
+                  <a href="mailto:comms@novacarter.io" className="hover:text-white" data-cursor="pointer">
+                    Email
+                  </a>
+                  <span className="opacity-40">/</span>
+                  <a href="https://github.com/nova" className="hover:text-white" data-cursor="pointer" target="_blank" rel="noreferrer">
+                    GitHub
+                  </a>
+                  <span className="opacity-40">/</span>
+                  <a href="https://www.linkedin.com" className="hover:text-white" data-cursor="pointer" target="_blank" rel="noreferrer">
+                    LinkedIn
+                  </a>
+                </div>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };
-

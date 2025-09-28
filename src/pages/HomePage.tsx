@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useProfile, useExperiences, useEducation, useProjects, useSkills } from '../hooks/usePortfolioData';
@@ -46,6 +46,13 @@ const cardHover = {
 const sectionShellClass =
   'relative z-10 w-full scroll-mt-28 px-4 py-20 sm:px-8 lg:px-14 xl:px-20 2xl:px-28';
 
+const ABOUT_TRAIT_BADGES = [
+  'Realtime telemetry',
+  'Adaptive UX systems',
+  'Crew leadership',
+  'Immersive storytelling',
+] as const;
+
 export const HomePage = () => {
   const { profile, loading: profileLoading } = useProfile();
   const { experiences, loading: experienceLoading } = useExperiences();
@@ -81,6 +88,8 @@ export const HomePage = () => {
     () => educationTimeline.filter((item) => item.type === 'certification'),
     [educationTimeline]
   );
+
+  const [activeCertificationId, setActiveCertificationId] = useState<string | null>(null);
 
   const latestCredential = useMemo(() => {
     if (certifications.length > 0) {
@@ -123,6 +132,32 @@ export const HomePage = () => {
 
   const contactEmail = profile?.email ?? 'hello@example.com';
   const orbitLocation = profile?.location ? `Orbiting from ${profile.location}` : 'Orbiting Earth';
+  const primaryExperience = orderedExperiences[0];
+  const aboutHighlights = [
+    {
+      label: 'Mission focus',
+      value: profile?.title ?? 'Mission systems architect',
+      description: 'Designing immersive control rooms and telemetry loops built to handle launch pressure.',
+    },
+    {
+      label: 'Current command',
+      value: primaryExperience
+        ? `${primaryExperience.role}${primaryExperience.company ? ` @ ${primaryExperience.company}` : ''}`
+        : 'Guiding cross-functional crews',
+      description:
+        primaryExperience?.duration ?? 'Keeping crews calibrated across every release window.',
+    },
+    {
+      label: 'Operating base',
+      value: profile?.location ?? 'Orbiting Earth',
+      description: 'Remote-first with on-site mission embeds where the crew needs a lead.',
+    },
+    {
+      label: 'Comms channel',
+      value: contactEmail,
+      description: 'Available for mission-critical engagements and rapid discovery calls.',
+    },
+  ];
   const getLogoUrl = (entity: { logo_url?: string | null } | Record<string, unknown>) => {
     const logo = (entity as { logo_url?: string | null }).logo_url;
     if (logo) return logo;
@@ -131,9 +166,9 @@ export const HomePage = () => {
   };
 
   const getInitial = (label?: string | null) => {
-    if (!label) return '�';
+    if (!label) return 'N';
     const trimmed = label.trim();
-    return trimmed ? trimmed.charAt(0).toUpperCase() : '�';
+    return trimmed ? trimmed.charAt(0).toUpperCase() : 'N';
   };
 
   useEffect(() => {
@@ -305,46 +340,6 @@ export const HomePage = () => {
         </div>
       </section>
 
-      <section id="about" className={sectionShellClass}>
-        <motion.div
-          variants={sectionVariant}
-          initial="initial"
-          whileInView="animate"
-          viewport={{ once: true, amount: 0.4 }}
-          className="reveal-on-scroll grid w-full gap-10 rounded-[32px] border border-white/10 bg-white/5 p-8 backdrop-blur-2xl lg:grid-cols-[minmax(0,_0.9fr)_minmax(0,_1.1fr)] lg:p-10 xl:gap-16"
-        >
-          <div className="relative flex items-center justify-center">
-            <div className="relative aspect-square w-full max-w-[420px] overflow-hidden rounded-[36px] border border-white/10 bg-gradient-to-br from-indigo-900/50 via-purple-900/40 to-sky-900/40 shadow-2xl shadow-indigo-950/40">
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(56,189,248,0.35),transparent_65%)]" />
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_75%,rgba(167,139,250,0.35),transparent_70%)]" />
-              {profile?.avatar_url ? (
-                <img
-                  src={profile.avatar_url}
-                  alt={profile?.name ?? 'Portrait'}
-                  loading="lazy"
-                  className="relative h-full w-full object-cover"
-                />
-              ) : (
-                <div className="relative flex h-full w-full items-center justify-center text-sm font-semibold text-indigo-100/70">
-                  Upload your portrait
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="flex flex-col justify-center space-y-6 text-left">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-200">About</p>
-            <h2 className="text-3xl font-semibold text-white sm:text-4xl">{profile?.name ?? 'Crewmate'}</h2>
-            <p className="text-sm leading-relaxed text-indigo-100/80 sm:text-base">{profile?.bio ?? 'I build interaction systems that keep crews confident while missions push the boundaries.'}</p>
-            <div className="flex flex-wrap gap-3 text-xs font-semibold uppercase tracking-[0.3em] text-indigo-200">
-              <span>{profile?.title ?? 'Systems Architect'}</span>
-              <span className="text-indigo-100/70">{orbitLocation}</span>
-            </div>
-          </div>
-        </motion.div>
-      </section>
-
-
       <section id="skills" className={sectionShellClass}>
         <motion.div
           variants={sectionVariant}
@@ -398,68 +393,120 @@ export const HomePage = () => {
             </p>
           </div>
 
-          <div className="relative mx-auto flex w-full max-w-5xl flex-col gap-10 lg:grid lg:grid-cols-[minmax(0,_1fr)_3.5rem_minmax(0,_1fr)] lg:gap-12">
-            <span className="pointer-events-none absolute left-1/2 top-0 hidden h-full w-px -translate-x-1/2 bg-gradient-to-b from-sky-400/70 via-white/10 to-transparent lg:block" />
+          <div className="relative mx-auto w-full max-w-6xl">
+            <span className="pointer-events-none absolute left-6 top-0 h-full w-px bg-gradient-to-b from-sky-400/60 via-white/12 to-transparent lg:hidden" />
+            <span className="pointer-events-none absolute inset-y-0 left-1/2 hidden w-px -translate-x-1/2 bg-gradient-to-b from-sky-400/60 via-white/12 to-transparent lg:block" />
 
-            {orderedExperiences.map((experience, index) => {
-              const alignLeft = index % 2 === 0;
-              const logoUrl = getLogoUrl(experience as Record<string, unknown>);
-              const initial = getInitial(experience.company ?? experience.role);
+            <div className="space-y-12 lg:space-y-16">
+              {orderedExperiences.map((experience, index) => {
+                const isLeft = index % 2 === 0;
+                const isFirst = index === 0;
+                const isLast = index === orderedExperiences.length - 1;
+                const logoUrl = getLogoUrl(experience as Record<string, unknown>);
+                const initial = getInitial(experience.company ?? experience.role);
 
-              return (
-                <motion.article
-                  key={experience.id ?? index}
-                  initial={{ opacity: 0, y: 40 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.55 }}
-                  transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-                  className={`relative rounded-3xl border border-white/10 bg-white/5 p-6 text-left shadow-2xl shadow-indigo-950/20 backdrop-blur-xl sm:p-7 ${
-                    alignLeft
-                      ? 'lg:col-start-1 lg:col-end-2 lg:ml-0 lg:mr-8'
-                      : 'lg:col-start-3 lg:col-end-4 lg:mr-0 lg:ml-8'
-                  }`}
-                  data-cursor="text"
-                >
-                  <span
-                    className={`hidden lg:flex absolute top-8 h-3 w-3 items-center justify-center rounded-full bg-sky-300 shadow-[0_0_12px_rgba(56,189,248,0.7)] ${
-                      alignLeft ? 'right-[-1.75rem]' : 'left-[-1.75rem]'
+                const card = (
+                  <div
+                    className={`rounded-3xl border border-white/12 bg-white/5 p-6 text-left shadow-2xl shadow-indigo-950/25 backdrop-blur-xl sm:p-7 ${
+                      isLeft ? 'lg:text-right' : 'lg:text-left'
                     }`}
-                  />
-
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
-                    <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/10">
-                      {logoUrl ? (
-                        <img src={logoUrl} alt={`${experience.company} logo`} loading="lazy" className="h-full w-full object-cover" />
-                      ) : (
-                        <span className="text-sm font-semibold text-white">{initial}</span>
-                      )}
-                    </div>
-                    <div className="space-y-3">
-                      <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.3em] text-indigo-200">
-                        <span>{experience.company}</span>
-                        <span className="text-indigo-100/70">{experience.duration}</span>
+                    data-cursor="text"
+                  >
+                    <div
+                      className={`mb-5 flex items-start gap-4 ${
+                        isLeft ? 'lg:flex-row-reverse' : ''
+                      }`}
+                    >
+                      <span
+                        className={`flex h-10 w-10 items-center justify-center rounded-full border border-sky-400/30 bg-gradient-to-br from-sky-500/30 via-sky-400/25 to-transparent text-sm font-semibold text-sky-100 shadow-sm lg:hidden ${
+                          isLeft ? 'order-last' : ''
+                        }`}
+                      >
+                        {index + 1}
+                      </span>
+                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/10 shadow-inner">
+                        {logoUrl ? (
+                          <img
+                            src={logoUrl}
+                            alt={`${experience.company} logo`}
+                            loading="lazy"
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-sm font-semibold text-white">{initial}</span>
+                        )}
                       </div>
-                      <div>
-                        <h3 className="text-xl font-semibold text-white">{experience.role}</h3>
-                        <p className="mt-2 text-sm leading-relaxed text-indigo-100/80">{experience.description}</p>
-                      </div>
-                      {experience.technologies?.length ? (
-                        <div className="flex flex-wrap gap-2">
-                          {experience.technologies.map((tech) => (
-                            <span
-                              key={`${experience.id ?? index}-${tech}`}
-                              className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-indigo-100/80"
-                            >
-                              {tech}
-                            </span>
-                          ))}
+                      <div className="space-y-3">
+                        <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.3em] text-indigo-200">
+                          <span>{experience.company}</span>
+                          <span className="text-indigo-100/70">{experience.duration}</span>
                         </div>
-                      ) : null}
+                        <div>
+                          <h3 className="text-xl font-semibold text-white">{experience.role}</h3>
+                          <p className="mt-2 text-sm leading-relaxed text-indigo-100/80">
+                            {experience.description}
+                          </p>
+                        </div>
+                        {experience.technologies?.length ? (
+                          <div
+                            className={`flex flex-wrap gap-2 ${
+                              isLeft ? 'lg:justify-end' : 'lg:justify-start'
+                            }`}
+                          >
+                            {experience.technologies.map((tech) => (
+                              <span
+                                key={`${experience.id ?? index}-${tech}`}
+                                className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-indigo-100/80"
+                              >
+                                {tech}
+                              </span>
+                            ))}
+                          </div>
+                        ) : null}
+                      </div>
                     </div>
                   </div>
-                </motion.article>
-              );
-            })}
+                );
+
+                const cardColumnClass = isLeft
+                  ? 'relative order-2 lg:order-1 lg:col-start-1 lg:pr-14 lg:text-right'
+                  : 'relative order-2 lg:order-3 lg:col-start-3 lg:pl-14 lg:text-left';
+
+                return (
+                  <motion.article
+                    key={experience.id ?? index}
+                    initial={{ opacity: 0, y: 40 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.55 }}
+                    transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                    className="experience-home-item relative grid gap-8 pl-12 sm:pl-16 lg:grid-cols-[minmax(0,1fr)_120px_minmax(0,1fr)] lg:items-center lg:gap-12 lg:pl-0"
+                  >
+                    <span className="absolute left-6 top-0 h-full w-px bg-gradient-to-b from-transparent via-sky-400/30 to-transparent lg:hidden" />
+
+                    <div className="order-1 hidden lg:flex lg:col-start-2 lg:flex-col lg:items-center lg:justify-center">
+                      {!isFirst && (
+                        <span className="mb-4 h-14 w-[3px] rounded-full bg-gradient-to-b from-transparent via-sky-200/45 to-sky-200/20" />
+                      )}
+                      <div className="relative z-20 flex h-12 w-12 items-center justify-center rounded-full border-4 border-slate-950 bg-gradient-to-r from-sky-400 via-indigo-400 to-purple-400 text-lg font-semibold text-slate-950 shadow-xl">
+                        {index + 1}
+                      </div>
+                      {!isLast && (
+                        <span className="mt-4 h-14 w-[3px] rounded-full bg-gradient-to-b from-sky-200/20 via-sky-200/45 to-transparent" />
+                      )}
+                    </div>
+
+                    <div className={cardColumnClass}>
+                      {isLeft ? (
+                        <span className="pointer-events-none absolute right-[-68px] top-1/2 hidden h-[3px] w-16 -translate-y-1/2 rounded-full bg-gradient-to-r from-sky-400/25 via-indigo-300/70 to-indigo-200/10 lg:block" />
+                      ) : (
+                        <span className="pointer-events-none absolute left-[-68px] top-1/2 hidden h-[3px] w-16 -translate-y-1/2 rounded-full bg-gradient-to-l from-sky-400/25 via-indigo-300/70 to-indigo-200/10 lg:block" />
+                      )}
+                      {card}
+                    </div>
+                  </motion.article>
+                );
+              })}
+            </div>
           </div>
         </motion.div>
       </section>
@@ -490,12 +537,66 @@ export const HomePage = () => {
             ))}
           </div>
 
-          <div className="grid gap-12 lg:grid-cols-[minmax(0,_0.55fr)_minmax(0,_0.45fr)]">
-            <div className="relative mt-6 space-y-10 lg:pl-10">
-              <div className="pointer-events-none absolute left-4 top-0 hidden h-full w-px bg-gradient-to-b from-indigo-400/60 via-white/15 to-transparent lg:block" />
+          <div className="relative mx-auto w-full max-w-6xl">
+            <span className="pointer-events-none absolute left-6 top-0 h-full w-px bg-gradient-to-b from-indigo-400/60 via-white/12 to-transparent lg:hidden" />
+            <span className="pointer-events-none absolute inset-y-0 left-1/2 hidden w-px -translate-x-1/2 bg-gradient-to-b from-indigo-400/60 via-white/12 to-transparent lg:block" />
+
+            <div className="space-y-12 lg:space-y-16">
               {formalEducation.map((item, index) => {
+                const isLeft = index % 2 === 0;
+                const isFirst = index === 0;
+                const isLast = index === formalEducation.length - 1;
                 const logoUrl = getLogoUrl(item as Record<string, unknown>);
                 const initial = getInitial(item.school_name ?? item.degree);
+
+                const card = (
+                  <div
+                    className={`rounded-3xl border border-white/12 bg-white/5 p-6 text-left shadow-xl shadow-indigo-900/25 backdrop-blur-xl sm:p-7 ${
+                      isLeft ? 'lg:text-right' : 'lg:text-left'
+                    }`}
+                    data-cursor="text"
+                  >
+                    <div
+                      className={`mb-5 flex items-start gap-4 ${
+                        isLeft ? 'lg:flex-row-reverse' : ''
+                      }`}
+                    >
+                      <span
+                        className={`flex h-10 w-10 items-center justify-center rounded-full border border-indigo-400/35 bg-gradient-to-br from-indigo-500/30 via-sky-500/25 to-transparent text-sm font-semibold text-indigo-100 shadow-sm lg:hidden ${
+                          isLeft ? 'order-last' : ''
+                        }`}
+                      >
+                        {index + 1}
+                      </span>
+                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/10 shadow-inner">
+                        {logoUrl ? (
+                          <img
+                            src={logoUrl}
+                            alt={`${item.school_name} logo`}
+                            loading="lazy"
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-sm font-semibold text-white">{initial}</span>
+                        )}
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.3em] text-indigo-200">
+                          <span>{item.school_name}</span>
+                          <span className="text-indigo-100/70">{item.duration}</span>
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-white">{item.degree}</h3>
+                          <p className="mt-2 text-sm leading-relaxed text-indigo-100/80">{item.description}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+
+                const cardColumnClass = isLeft
+                  ? 'relative order-2 lg:order-1 lg:col-start-1 lg:pr-14 lg:text-right'
+                  : 'relative order-2 lg:order-3 lg:col-start-3 lg:pl-14 lg:text-left';
 
                 return (
                   <motion.article
@@ -504,148 +605,254 @@ export const HomePage = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.6 }}
                     transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-                    className="relative rounded-3xl border border-white/10 bg-white/5 p-6 pl-12 text-left shadow-xl shadow-indigo-900/25 backdrop-blur-xl sm:p-7"
-                    data-cursor="text"
+                    className="education-home-item relative grid gap-8 pl-12 sm:pl-16 lg:grid-cols-[minmax(0,1fr)_140px_minmax(0,1fr)] lg:items-center lg:gap-12 lg:pl-0"
                   >
-                    <span className="absolute left-4 top-6 flex h-8 w-8 items-center justify-center">
-                      <span className="absolute h-8 w-8 rounded-full border border-indigo-300/40 bg-indigo-500/15 blur-md" />
-                      <span className="relative h-3 w-3 rounded-full bg-indigo-300 shadow-[0_0_12px_rgba(165,180,252,0.6)]" />
-                    </span>
+                    <span className="absolute left-6 top-0 h-full w-px bg-gradient-to-b from-transparent via-indigo-400/30 to-transparent lg:hidden" />
 
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-6">
-                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/10">
-                        {logoUrl ? (
-                          <img src={logoUrl} alt={`${item.school_name} logo`} loading="lazy" className="h-full w-full object-cover" />
-                        ) : (
-                          <span className="text-sm font-semibold text-white">{initial}</span>
-                        )}
+                    <div className="order-1 hidden lg:flex lg:col-start-2 lg:flex-col lg:items-center lg:justify-center">
+                      {!isFirst && (
+                        <span className="mb-4 h-14 w-[3px] rounded-full bg-gradient-to-b from-transparent via-indigo-200/45 to-indigo-200/20" />
+                      )}
+                      <div className="relative z-20 flex h-12 w-12 items-center justify-center rounded-full border-4 border-slate-950 bg-gradient-to-r from-indigo-400 via-sky-400 to-purple-400 text-lg font-semibold text-slate-950 shadow-xl">
+                        {index + 1}
                       </div>
-                      <div className="space-y-3">
-                        <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.3em] text-indigo-200">
-                          <span>Program</span>
-                          <span className="text-indigo-100/70">{item.duration}</span>
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-semibold text-white">{item.degree}</h3>
-                          <p className="mt-2 text-sm text-indigo-100/80 leading-relaxed">{item.description}</p>
-                        </div>
-                      </div>
+                      {!isLast && (
+                        <span className="mt-4 h-14 w-[3px] rounded-full bg-gradient-to-b from-indigo-200/20 via-indigo-200/45 to-transparent" />
+                      )}
+                    </div>
+
+                    <div className={cardColumnClass}>
+                      {isLeft ? (
+                        <span className="pointer-events-none absolute right-[-68px] top-1/2 hidden h-[3px] w-16 -translate-y-1/2 rounded-full bg-gradient-to-r from-indigo-400/20 via-indigo-300/70 to-indigo-200/10 lg:block" />
+                      ) : (
+                        <span className="pointer-events-none absolute left-[-68px] top-1/2 hidden h-[3px] w-16 -translate-y-1/2 rounded-full bg-gradient-to-l from-indigo-400/20 via-indigo-300/70 to-indigo-200/10 lg:block" />
+                      )}
+                      {card}
                     </div>
                   </motion.article>
                 );
               })}
             </div>
+          </div>
 
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold uppercase tracking-[0.25em] text-indigo-100">Certifications</h3>
-                <p className="mt-2 text-sm text-indigo-100/80">Hover a badge to surface the mission focus.</p>
+          {certifications.length > 0 && (
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl shadow-indigo-950/25 backdrop-blur-xl">
+              <div className="flex flex-col gap-4 text-left sm:flex-row sm:items-end sm:justify-between">
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-200">Certification dossier</p>
+                  <h3 className="flex items-center gap-3 text-lg font-semibold uppercase tracking-[0.25em] text-indigo-100">
+                    Certifications
+                    <span className="inline-flex items-center rounded-full border border-indigo-400/40 bg-indigo-500/15 px-3 py-1 text-[0.65rem] font-semibold text-indigo-200">
+                      {certifications.length} listed
+                    </span>
+                  </h3>
+                </div>
+                <p className="text-xs text-indigo-100/70 sm:max-w-xs sm:text-right">
+                  Hover a badge to surface the mission focus.
+                </p>
               </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {certifications.length ? (
-                  certifications.map((item, index) => {
-                    const logoUrl = getLogoUrl(item as Record<string, unknown>);
-                    const initial = getInitial(item.degree);
-                    return (
-                      <motion.div
-                        key={item.id ?? index}
-                        className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 px-5 py-6 backdrop-blur-xl transition-[transform,box-shadow] duration-300 hover:-translate-y-2 hover:shadow-[0_25px_55px_-18px_rgba(129,140,248,0.55)]"
-                        data-cursor="text"
-                        whileHover={{ scale: 1.01 }}
-                      >
-                        <div className="relative z-10 flex items-center gap-3">
-                          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/10">
-                            {logoUrl ? (
-                              <img src={logoUrl} alt={`${item.school_name} logo`} loading="lazy" className="h-full w-full object-cover" />
-                            ) : (
-                              <span className="text-sm font-semibold text-white">{initial}</span>
-                            )}
-                          </div>
-                          <div className="space-y-1">
-                            <p className="text-sm font-semibold text-white">{item.degree}</p>
-                            <p className="text-xs uppercase tracking-[0.3em] text-indigo-200">{item.school_name}</p>
-                            <p className="text-xs text-indigo-100/70">{item.duration}</p>
-                          </div>
+
+              <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {certifications.map((item, index) => {
+                  const cardId = item.id ?? `home-cert-${index}`;
+                  const logoUrl = getLogoUrl(item as Record<string, unknown>);
+                  const initial = getInitial(item.degree);
+                  const description = (item.description ?? '').trim();
+                  const isActive = activeCertificationId === cardId;
+
+                  return (
+                    <motion.div
+                      key={cardId}
+                      className="group relative overflow-visible rounded-2xl border border-white/10 bg-white/5 px-5 py-6 backdrop-blur-xl transition-[transform,box-shadow] duration-300 hover:-translate-y-2 hover:shadow-[0_30px_55px_-22px_rgba(99,102,241,0.5)]"
+                      data-cursor="text"
+                      whileHover={{ scale: 1.01 }}
+                      onHoverStart={() => setActiveCertificationId(cardId)}
+                      onHoverEnd={() =>
+                        setActiveCertificationId((current) => (current === cardId ? null : current))
+                      }
+                      onFocus={() => setActiveCertificationId(cardId)}
+                      onBlur={() =>
+                        setActiveCertificationId((current) => (current === cardId ? null : current))
+                      }
+                      tabIndex={0}
+                    >
+                      <div className="relative z-10 flex items-center gap-4">
+                        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/10">
+                          {logoUrl ? (
+                            <img
+                              src={logoUrl}
+                              alt={`${item.school_name} logo`}
+                              loading="lazy"
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-sm font-semibold text-white">{initial}</span>
+                          )}
                         </div>
-                        {item.description ? (
-                          <div className="pointer-events-none absolute inset-x-0 bottom-0 translate-y-8 bg-gradient-to-t from-slate-950/85 via-slate-900/40 to-transparent opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-                            <p className="px-5 pb-5 pt-6 text-left text-xs text-indigo-100/85">{item.description}</p>
-                          </div>
-                        ) : null}
-                      </motion.div>
-                    );
-                  })
-                ) : (
-                  <p className="text-xs text-indigo-100/60">No certifications logged yet.</p>
-                )}
+                        <div className="space-y-1">
+                          <p className="text-sm font-semibold text-white">{item.degree}</p>
+                          <p className="text-xs uppercase tracking-[0.3em] text-indigo-200">{item.school_name}</p>
+                          <p className="text-xs text-indigo-100/70">{item.duration}</p>
+                        </div>
+                      </div>
+
+                      <AnimatePresence>
+                        {isActive && (
+                          <motion.div
+                            key="cert-popover"
+                            initial={{ opacity: 0, y: 12, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 12, scale: 0.95 }}
+                            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                            className="pointer-events-none absolute left-1/2 top-full z-20 hidden w-72 -translate-x-1/2 translate-y-6 rounded-2xl border border-indigo-400/40 bg-slate-950/95 p-5 text-left shadow-2xl shadow-indigo-900/50 backdrop-blur-xl md:flex md:flex-col"
+                          >
+                            <div className="mb-4 flex items-center gap-4">
+                              {logoUrl ? (
+                                <img
+                                  src={logoUrl}
+                                  alt={`${item.school_name} emblem`}
+                                  loading="lazy"
+                                  className="h-16 w-16 flex-shrink-0 rounded-xl object-cover shadow-lg"
+                                />
+                              ) : (
+                                <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-xl border border-indigo-400/40 bg-indigo-500/20 text-lg font-semibold text-indigo-100">
+                                  {initial}
+                                </div>
+                              )}
+                              <div className="space-y-1 text-left">
+                                <p className="text-sm font-semibold text-white">{item.degree}</p>
+                                <p className="text-xs uppercase tracking-[0.3em] text-indigo-200">{item.school_name}</p>
+                                <p className="text-xs text-indigo-100/70">{item.duration}</p>
+                              </div>
+                            </div>
+                            <p className="text-xs leading-relaxed text-indigo-100/85">
+                              {description || 'No additional details provided.'}
+                            </p>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      {description ? (
+                        <div className="mt-4 rounded-xl border border-indigo-400/25 bg-slate-950/70 p-4 text-left text-xs text-indigo-100/85 md:hidden">
+                          {description}
+                        </div>
+                      ) : null}
+                    </motion.div>
+                  );
+                })}
               </div>
             </div>
-          </div>
+      )}
         </motion.div>
       </section>
-      <section id="projects" className={sectionShellClass}>
+
+      <section id="about" className={sectionShellClass}>
         <motion.div
           variants={sectionVariant}
           initial="initial"
           whileInView="animate"
-          viewport={{ once: true, amount: 0.4 }}
-          className="reveal-on-scroll w-full"
+          viewport={{ once: true, amount: 0.35 }}
+          className="reveal-on-scroll w-full space-y-12 rounded-[36px] border border-white/10 bg-white/5 p-8 backdrop-blur-2xl sm:p-10 lg:p-12"
         >
-          <div className="flex flex-col gap-4 pb-10 text-left lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-200">Missions</p>
-              <h2 className="text-3xl font-semibold text-white sm:text-4xl">Highlighted operations across the fleet</h2>
-            </div>
-            <p className="max-w-xl text-sm text-indigo-100/80">
-              From orbital simulators to planetary logistics dashboards, each mission fuses spectacle with reliability.
+          <div className="space-y-4 text-left sm:text-center lg:text-left">
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-200">About</p>
+            <h2 className="text-3xl font-semibold text-white sm:text-4xl lg:text-5xl">
+              {profile?.name ?? 'Crewmate'} keeps mission crews aligned even when telemetry spikes.
+            </h2>
+            <p className="mx-auto max-w-3xl text-sm text-indigo-100/80 sm:text-base lg:mx-0">
+              {profile?.bio ?? 'I build interaction systems that keep crews confident while missions push the boundaries.'}
             </p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:gap-8 2xl:gap-10">
-            {featuredProjects.map((project) => (
-              <motion.article
-                key={project.id}
-                className="group flex h-full flex-col justify-between rounded-3xl border border-white/10 bg-white/5 p-6 text-left backdrop-blur-xl"
-                whileHover={cardHover.whileHover}
-                whileTap={cardHover.whileTap}
-                data-cursor="text"
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,_1.05fr)_minmax(0,_0.95fr)] lg:items-stretch">
+            <div className="relative overflow-hidden rounded-[32px] border border-indigo-400/40 bg-gradient-to-br from-indigo-950/80 via-slate-950/70 to-slate-900/70 p-6 sm:p-8">
+              <div className="pointer-events-none absolute -top-24 -left-16 h-64 w-64 rounded-full bg-indigo-500/30 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-28 -right-20 h-64 w-64 rounded-full bg-purple-500/25 blur-3xl" />
+              <div className="relative flex h-full flex-col items-center gap-6 text-center sm:items-start sm:text-left">
+                {profile?.avatar_url ? (
+                  <img
+                    src={profile.avatar_url}
+                    alt={profile?.name ?? 'Portrait'}
+                    loading="lazy"
+                    className="h-24 w-24 rounded-[28px] border border-white/20 object-cover shadow-xl"
+                  />
+                ) : (
+                  <div className="flex h-24 w-24 items-center justify-center rounded-[28px] border border-white/15 bg-white/10 text-3xl font-semibold text-indigo-100 shadow-inner">
+                    {getInitial(profile?.name)}
+                  </div>
+                )}
+                <div className="space-y-3">
+                  <h3 className="text-2xl font-semibold text-white sm:text-3xl">{profile?.name ?? 'Crewmate'}</h3>
+                  <p className="text-sm leading-relaxed text-indigo-100/85 sm:text-base">
+                    {profile?.bio ?? 'I build interaction systems that keep crews confident while missions push the boundaries.'}
+                  </p>
+                </div>
+                <div className="flex flex-wrap justify-center gap-3 text-xs font-semibold uppercase tracking-[0.35em] text-indigo-200 sm:justify-start">
+                  {profile?.title ? <span>{profile.title}</span> : null}
+                  <span className="text-indigo-100/70">{profile?.location ?? orbitLocation}</span>
+                </div>
+                {primaryExperience ? (
+                  <div className="w-full rounded-2xl border border-white/10 bg-white/5 p-4 text-left text-indigo-100/85 shadow-inner">
+                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-200">Current mission</p>
+                    <p className="mt-2 text-base font-semibold text-white">{primaryExperience.role}</p>
+                    {primaryExperience.company ? (
+                      <p className="text-sm text-indigo-100/75">{primaryExperience.company}</p>
+                    ) : null}
+                    {primaryExperience.duration ? (
+                      <p className="mt-3 text-xs uppercase tracking-[0.35em] text-indigo-200">{primaryExperience.duration}</p>
+                    ) : null}
+                  </div>
+                ) : null}
+                <motion.button
+                  type="button"
+                  className="group inline-flex items-center justify-center gap-3 rounded-full border border-indigo-400/40 bg-white/10 px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-indigo-100 transition hover:border-white/60 hover:bg-white/20"
+                  data-cursor="pointer"
+                  whileHover={{ scale: 1.04, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleScrollToSection('contact')}
+                >
+                  Initiate Contact
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/15 text-xs text-white transition group-hover:bg-white/25">
+                    {'>'}
+                  </span>
+                </motion.button>
+              </div>
+            </div>
+
+            <div className="grid h-full gap-4 sm:grid-cols-2">
+              {aboutHighlights.map((item) => (
+                <motion.div
+                  key={item.label}
+                  className="rounded-2xl border border-white/10 bg-white/5 p-5 text-left backdrop-blur-xl transition-[transform,border-color] hover:border-indigo-400/60"
+                  whileHover={{ y: -4 }}
+                >
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-200">{item.label}</p>
+                  <p className="mt-2 break-words text-lg font-semibold text-white">{item.value}</p>
+                  <p className="mt-2 text-xs text-indigo-100/80">{item.description}</p>
+                </motion.div>
+              ))}
+
+              <motion.div
+                className="col-span-full rounded-2xl border border-indigo-400/30 bg-indigo-500/10 p-5 text-left backdrop-blur-xl"
+                whileHover={{ y: -4 }}
               >
-                <div>
-                  <div className="text-xs uppercase tracking-[0.3em] text-indigo-200">{project.technologies.slice(0, 3).join(' | ')}</div>
-                  <h3 className="mt-3 text-xl font-semibold text-white">{project.title}</h3>
-                  <p className="mt-3 text-sm text-indigo-100/80 line-clamp-4">{project.description}</p>
-                </div>
-                <div className="mt-5 flex flex-wrap gap-3 text-sm">
-                  {project.live_url && (
-                    <a
-                      href={project.live_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-indigo-100 transition hover:border-indigo-400 hover:text-white"
-                      data-cursor="pointer"
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-200">Signal traits</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {ABOUT_TRAIT_BADGES.map((trait) => (
+                    <span
+                      key={trait}
+                      className="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-indigo-100"
                     >
-                      Mission Brief
-                      <span>?</span>
-                    </a>
-                  )}
-                  {project.github_url && (
-                    <a
-                      href={project.github_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-indigo-100 transition hover:border-indigo-400 hover:text-white"
-                      data-cursor="pointer"
-                    >
-                      Source Logs
-                      <span>?</span>
-                    </a>
-                  )}
+                      {trait}
+                    </span>
+                  ))}
                 </div>
-              </motion.article>
-            ))}
+              </motion.div>
+            </div>
           </div>
         </motion.div>
       </section>
+
 
       <section id="contact" className={`${sectionShellClass} pb-32`}>
         <motion.div
@@ -680,7 +887,3 @@ export const HomePage = () => {
     </div>
   );
 };
-
-
-
-
