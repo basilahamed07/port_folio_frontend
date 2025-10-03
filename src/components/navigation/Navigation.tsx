@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { MouseEvent as ReactMouseEvent, TouchEvent as ReactTouchEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useProfile } from '../../hooks/usePortfolioData';
 
 const SECTION_NAV_ITEMS = [
   { name: 'Home', sectionId: 'hero' },
@@ -23,11 +24,13 @@ const OVERLAY_PANEL_CLASSES = [
 ] as const;
 
 export const Navigation = () => {
+  const { profile } = useProfile();
   const [activeSection, setActiveSection] = useState<SectionId>('hero');
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const overlayContentRef = useRef<HTMLDivElement | null>(null);
+  const navLabel = (profile?.nav_label ?? profile?.name ?? 'NOVA').toUpperCase();
 
   const closeMenu = useCallback(() => setMenuOpen(false), []);
   const handleBackdropInteraction = useCallback(
@@ -208,7 +211,7 @@ export const Navigation = () => {
             data-cursor="pointer"
             whileHover={{ letterSpacing: '0.5em' }}
           >
-            NOVA
+            {navLabel}
           </motion.button>
 
           <div className="hidden md:flex items-center gap-3">

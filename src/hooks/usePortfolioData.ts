@@ -23,12 +23,28 @@ type SkillsPayload = {
   items?: Skill[] | null;
 };
 
+type MissionStat = {
+  id?: string | null;
+  label: string;
+  value: string;
+  description?: string | null;
+};
+
+type SpaceHighlight = {
+  id?: string | null;
+  title: string;
+  description?: string | null;
+  badge?: string | null;
+};
+
 type PortfolioResponse = {
   profile?: Profile | null;
   skills?: SkillsPayload | null;
   experiences?: Experience[] | null;
   education?: Education[] | null;
   projects?: Project[] | null;
+  mission_stats?: MissionStat[] | null;
+  space_highlights?: SpaceHighlight[] | null;
 };
 
 const STATIC_PROFILE: Profile = {
@@ -41,6 +57,9 @@ const STATIC_PROFILE: Profile = {
   avatar_url: null,
   created_at: '2025-01-01T00:00:00Z',
   updated_at: '2025-01-01T00:00:00Z',
+  nav_label: 'Nova Carter',
+  headline_words: ['Interstellar', 'Mission-ready', 'Combat-simulated', 'Adaptive'],
+  about_background_url: null,
 };
 
 const STATIC_EXPERIENCES: Experience[] = [
@@ -167,6 +186,46 @@ const STATIC_SKILLS: SkillsPayload = {
   ],
 };
 
+const STATIC_SPACE_HIGHLIGHTS: SpaceHighlight[] = [
+  {
+    id: 'highlight-telemetry',
+    title: 'Telemetry sync',
+    description: 'GSAP-synced thrusters and HUD cues reacting to pointer flight paths.',
+  },
+  {
+    id: 'highlight-combat-sim',
+    title: 'Three.js combat sim',
+    description: 'Procedural starfighters, nebulae, and plasma trails flying in formation.',
+  },
+];
+
+const STATIC_MISSION_STATS: MissionStat[] = [
+  {
+    id: 'stat-missions',
+    label: 'Deep-space missions shipped',
+    value: '32',
+    description: 'Command modules and immersive ops rooms launched with cinematic UX.',
+  },
+  {
+    id: 'stat-uptime',
+    label: 'Live telemetry uptime',
+    value: '99.99%',
+    description: 'Redundant pipelines keep mission dashboards glowing around the clock.',
+  },
+  {
+    id: 'stat-streams',
+    label: 'Realtime data streams',
+    value: '74',
+    description: 'Sensor, satellite, and crew feeds braided into one control surface.',
+  },
+  {
+    id: 'stat-systems',
+    label: 'Systems in active rotation',
+    value: '12',
+    description: 'React, Three.js, GSAP, Supabase, Tailwind, and more interlinked.',
+  },
+];
+
 
 
 const FALLBACK_DATA = {
@@ -175,6 +234,8 @@ const FALLBACK_DATA = {
   experiences: STATIC_EXPERIENCES,
   education: STATIC_EDUCATION,
   projects: STATIC_PROJECTS,
+  mission_stats: STATIC_MISSION_STATS,
+  space_highlights: STATIC_SPACE_HIGHLIGHTS,
 };
 
 const hydrateWithFallback = (payload?: PortfolioResponse | null) => ({
@@ -199,6 +260,14 @@ const hydrateWithFallback = (payload?: PortfolioResponse | null) => ({
     Array.isArray(payload?.projects) && payload?.projects.length
       ? payload.projects
       : FALLBACK_DATA.projects,
+  mission_stats:
+    Array.isArray(payload?.mission_stats) && payload?.mission_stats.length
+      ? payload.mission_stats
+      : FALLBACK_DATA.mission_stats,
+  space_highlights:
+    Array.isArray(payload?.space_highlights) && payload?.space_highlights.length
+      ? payload.space_highlights
+      : FALLBACK_DATA.space_highlights,
 });
 
 let portfolioRequest: Promise<ReturnType<typeof hydrateWithFallback>> | null = null;
@@ -376,6 +445,70 @@ export const useProjects = () => {
   }, []);
 
   return { projects, loading, error, setProjects };
+};
+
+export const useMissionStats = () => {
+  const [missionStats, setMissionStats] = useState<MissionStat[]>(FALLBACK_DATA.mission_stats);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+
+    fetchPortfolioData()
+      .then((data) => {
+        if (!mounted) return;
+        setMissionStats(data.mission_stats);
+        setError(null);
+      })
+      .catch((err) => {
+        if (!mounted) return;
+        setMissionStats(FALLBACK_DATA.mission_stats);
+        setError(err instanceof Error ? err.message : 'Failed to load mission stats');
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  return { missionStats, loading, error, setMissionStats };
+};
+
+export const useSpaceHighlights = () => {
+  const [spaceHighlights, setSpaceHighlights] = useState<SpaceHighlight[]>(FALLBACK_DATA.space_highlights);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+
+    fetchPortfolioData()
+      .then((data) => {
+        if (!mounted) return;
+        setSpaceHighlights(data.space_highlights);
+        setError(null);
+      })
+      .catch((err) => {
+        if (!mounted) return;
+        setSpaceHighlights(FALLBACK_DATA.space_highlights);
+        setError(err instanceof Error ? err.message : 'Failed to load space highlights');
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  return { spaceHighlights, loading, error, setSpaceHighlights };
 };
 
 export const useContactMessages = () => {

@@ -2,36 +2,13 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { useProfile, useExperiences, useEducation, useProjects, useSkills } from '../hooks/usePortfolioData';
+import { useProfile, useExperiences, useEducation, useProjects, useSkills, useMissionStats, useSpaceHighlights } from '../hooks/usePortfolioData';
 import { HeroOrb } from '../components/animations/HeroOrb';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const stats = [
-  {
-    label: 'Deep-space missions shipped',
-    value: '32',
-    description: 'Command modules and immersive ops rooms launched with cinematic UX.',
-  },
-  {
-    label: 'Live telemetry uptime',
-    value: '99.99%',
-    description: 'Redundant pipelines keep mission dashboards glowing around the clock.',
-  },
-  {
-    label: 'Realtime data streams',
-    value: '74',
-    description: 'Sensor, satellite, and crew feeds braided into one control surface.',
-  },
-  {
-    label: 'Systems in active rotation',
-    value: '12',
-    description: 'React, Three.js, GSAP, Supabase, Tailwind, and more interlinked.',
-  },
-];
 
-const featureWords = ['Interstellar', 'Mission-ready', 'Combat-simulated', 'Adaptive'];
 
 const sectionVariant = {
   initial: { opacity: 0, y: 40 },
@@ -53,16 +30,53 @@ const ABOUT_TRAIT_BADGES = [
   'Immersive storytelling',
 ] as const;
 
+const HIGHLIGHT_CONFIGS = [
+  {
+    className: 'absolute -right-6 top-1/3 w-40 rounded-3xl border border-white/15 bg-white/10 p-4 text-left backdrop-blur-xl sm:-right-10',
+    initial: { opacity: 0, x: 40 },
+    whileInView: { opacity: 1, x: 0 },
+  },
+  {
+    className: 'absolute -left-6 bottom-6 w-44 rounded-3xl border border-white/15 bg-white/10 p-4 text-left backdrop-blur-xl sm:-left-12',
+    initial: { opacity: 0, y: 40 },
+    whileInView: { opacity: 1, y: 0 },
+  },
+] as const;
+
+
+const certificationCardVariants = {
+  idle: {
+    y: 0,
+    scale: 1,
+    boxShadow: '0 14px 32px -18px rgba(15, 23, 42, 0.45)',
+  },
+  active: {
+    y: -14,
+    scale: 1.045,
+    boxShadow: '0 45px 75px -30px rgba(99, 102, 241, 0.55)',
+    transition: { duration: 0.35, ease: [0.19, 1, 0.22, 1] },
+  },
+};
+
 export const HomePage = () => {
   const { profile, loading: profileLoading } = useProfile();
   const { experiences, loading: experienceLoading } = useExperiences();
   const { education, loading: educationLoading } = useEducation();
   const { projects, loading: projectsLoading } = useProjects();
   const { skillsSection, loading: skillsLoading } = useSkills();
+  const { missionStats, loading: missionStatsLoading } = useMissionStats();
+  const { spaceHighlights, loading: spaceHighlightsLoading } = useSpaceHighlights();
   const pageRef = useRef<HTMLDivElement>(null);
+  const aboutSectionRef = useRef<HTMLDivElement>(null);
 
   const loading =
-    profileLoading || experienceLoading || educationLoading || projectsLoading || skillsLoading;
+    profileLoading ||
+    experienceLoading ||
+    educationLoading ||
+    projectsLoading ||
+    skillsLoading ||
+    missionStatsLoading ||
+    spaceHighlightsLoading;
 
   const orderedExperiences = useMemo(() => {
     return [...experiences].sort((a, b) => {
@@ -132,6 +146,29 @@ export const HomePage = () => {
 
   const contactEmail = profile?.email ?? 'hello@example.com';
   const orbitLocation = profile?.location ? `Orbiting from ${profile.location}` : 'Orbiting Earth';
+  const featureWords = useMemo(
+    () =>
+      profile?.headline_words && profile.headline_words.length > 0
+        ? profile.headline_words
+        : ['Interstellar', 'Mission-ready', 'Combat-simulated', 'Adaptive'],
+    [profile?.headline_words]
+  );
+
+  const aboutBackgroundImage = useMemo(
+    () => profile?.about_background_url ?? profile?.avatar_url ?? null,
+    [profile?.about_background_url, profile?.avatar_url]
+  );
+  const aboutBackgroundStyle = useMemo(
+    () =>
+      aboutBackgroundImage
+        ? {
+            backgroundImage: `linear-gradient(160deg, rgba(8, 12, 24, 0.92) 0%, rgba(18, 20, 36, 0.82) 45%, rgba(10, 15, 32, 0.94) 100%), url(${aboutBackgroundImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }
+        : undefined,
+    [aboutBackgroundImage]
+  );
   const primaryExperience = orderedExperiences[0];
   const aboutHighlights = [
     {
@@ -158,6 +195,43 @@ export const HomePage = () => {
       description: 'Available for mission-critical engagements and rapid discovery calls.',
     },
   ];
+  const conciseHighlights = useMemo(() => aboutHighlights.slice(0, 3), [aboutHighlights]);
+
+
+  useEffect(() => {
+    if (loading) return;
+    if (!aboutSectionRef.current) return;
+
+    const ctx = gsap.context(() => {
+      gsap.from('[data-about-animate="heading"]', {
+        opacity: 0,
+        y: 28,
+        duration: 0.8,
+        ease: 'power3.out',
+      });
+
+      gsap.from('[data-about-animate="card"]', {
+        opacity: 0,
+        y: 36,
+        duration: 0.9,
+        ease: 'power3.out',
+        stagger: 0.14,
+        delay: 0.12,
+      });
+
+      gsap.from('[data-about-animate="meta"]', {
+        opacity: 0,
+        y: 18,
+        duration: 0.75,
+        ease: 'power2.out',
+        stagger: 0.08,
+        delay: 0.3,
+      });
+    }, aboutSectionRef);
+
+    return () => ctx.revert();
+  }, [loading]);
+
   const getLogoUrl = (entity: { logo_url?: string | null } | Record<string, unknown>) => {
     const logo = (entity as { logo_url?: string | null }).logo_url;
     if (logo) return logo;
@@ -292,16 +366,16 @@ export const HomePage = () => {
             </div>
 
             <div className="grid grid-cols-1 gap-4 text-left sm:grid-cols-2 lg:grid-cols-4">
-              {stats.map((item) => (
+              {missionStats.map((item) => (
                 <motion.div
-                  key={item.label}
+                  key={item.id ?? item.label}
                   className="reveal-on-scroll group rounded-3xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:border-indigo-400/60 hover:bg-indigo-500/10"
                   whileHover={{ scale: 1.03 }}
                   data-cursor="pointer"
                 >
                   <p className="text-3xl font-black text-white">{item.value}</p>
                   <p className="mt-2 text-sm font-semibold uppercase tracking-wide text-indigo-200">{item.label}</p>
-                  <p className="mt-2 text-xs text-indigo-100/80">{item.description}</p>
+                  <p className="mt-2 text-xs text-indigo-100/80">{item.description ?? 'Details on standby.'}</p>
                 </motion.div>
               ))}
             </div>
@@ -312,29 +386,30 @@ export const HomePage = () => {
               <div className="absolute inset-10 -z-10 rounded-[52px] bg-gradient-to-tr from-indigo-500/40 via-purple-500/30 to-sky-400/30 blur-3xl sm:inset-12" />
               <HeroOrb className="h-full w-full" />
 
-              <motion.div
-                className="absolute -right-6 top-1/3 w-40 rounded-3xl border border-white/15 bg-white/10 p-4 text-left backdrop-blur-xl sm:-right-10"
-                initial={{ opacity: 0, x: 40 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.5 }}
-                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                data-cursor="pointer"
-              >
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-200">Telemetry sync</p>
-                <p className="mt-2 text-sm text-indigo-100/90">GSAP-synced thrusters and HUD cues reacting to pointer flight paths.</p>
-              </motion.div>
+              {spaceHighlights.slice(0, HIGHLIGHT_CONFIGS.length).map((highlight, index) => {
+                const config = HIGHLIGHT_CONFIGS[index];
+                if (!config) return null;
 
-              <motion.div
-                className="absolute -left-6 bottom-6 w-44 rounded-3xl border border-white/15 bg-white/10 p-4 text-left backdrop-blur-xl sm:-left-12"
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.5 }}
-                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                data-cursor="pointer"
-              >
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-200">Three.js combat sim</p>
-                <p className="mt-2 text-sm text-indigo-100/90">Procedural starfighters, nebulae, and plasma trails flying in formation.</p>
-              </motion.div>
+                return (
+                  <motion.div
+                    key={highlight.id ?? highlight.title ?? index}
+                    className={config.className}
+                    initial={config.initial}
+                    whileInView={config.whileInView}
+                    viewport={{ once: true, amount: 0.5 }}
+                    transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                    data-cursor="pointer"
+                  >
+                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-200">
+                      {highlight.title ?? 'Mission signal'}
+                    </p>
+                    <p className="mt-2 text-sm text-indigo-100/90">
+                      {highlight.description ?? 'Dynamic highlight ready for telemetry updates.'}
+                    </p>
+                  </motion.div>
+                );
+              })}
+
             </div>
           </div>
         </div>
@@ -587,7 +662,7 @@ export const HomePage = () => {
                         </div>
                         <div>
                           <h3 className="text-lg font-semibold text-white">{item.degree}</h3>
-                          <p className="mt-2 text-sm leading-relaxed text-indigo-100/80">{item.description}</p>
+                          <p className="mt-2 text-sm leading-relaxed text-indigo-100/80">{item.description ?? 'Details on standby.'}</p>
                         </div>
                       </div>
                     </div>
@@ -663,9 +738,14 @@ export const HomePage = () => {
                   return (
                     <motion.div
                       key={cardId}
-                      className="group relative overflow-visible rounded-2xl border border-white/10 bg-white/5 px-5 py-6 backdrop-blur-xl transition-[transform,box-shadow] duration-300 hover:-translate-y-2 hover:shadow-[0_30px_55px_-22px_rgba(99,102,241,0.5)]"
+                      className="group relative overflow-visible rounded-2xl border border-white/10 bg-white/5 px-5 py-6 backdrop-blur-xl transition-transform will-change-transform"
                       data-cursor="text"
-                      whileHover={{ scale: 1.01 }}
+                      variants={certificationCardVariants}
+                      initial="idle"
+                      animate={isActive ? 'active' : 'idle'}
+                      whileHover="active"
+                      whileTap={{ scale: 0.98 }}
+                      transition={{ duration: 0.32, ease: [0.19, 1, 0.22, 1] }}
                       onHoverStart={() => setActiveCertificationId(cardId)}
                       onHoverEnd={() =>
                         setActiveCertificationId((current) => (current === cardId ? null : current))
@@ -676,6 +756,12 @@ export const HomePage = () => {
                       }
                       tabIndex={0}
                     >
+                      <motion.span
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-500/18 via-sky-500/12 to-purple-500/18 opacity-0 blur-[26px]"
+                        variants={{ idle: { opacity: 0 }, active: { opacity: 1 } }}
+                        transition={{ duration: 0.32, ease: [0.19, 1, 0.22, 1] }}
+                      />
                       <div className="relative z-10 flex items-center gap-4">
                         <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/10">
                           {logoUrl ? (
@@ -748,13 +834,18 @@ export const HomePage = () => {
 
       <section id="about" className={sectionShellClass}>
         <motion.div
+          ref={aboutSectionRef}
           variants={sectionVariant}
           initial="initial"
           whileInView="animate"
           viewport={{ once: true, amount: 0.35 }}
-          className="reveal-on-scroll w-full space-y-12 rounded-[36px] border border-white/10 bg-white/5 p-8 backdrop-blur-2xl sm:p-10 lg:p-12"
+          style={aboutBackgroundStyle}
+          className="reveal-on-scroll relative w-full overflow-hidden space-y-10 rounded-[36px] border border-white/10 bg-white/5 bg-cover bg-center p-8 shadow-2xl shadow-indigo-950/40 backdrop-blur-2xl sm:p-10 lg:p-14"
         >
-          <div className="space-y-4 text-left sm:text-center lg:text-left">
+          {aboutBackgroundImage ? (
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(76,90,182,0.18),transparent_65%)]" />
+          ) : null}
+          <div className="space-y-4 text-left sm:text-center lg:text-left" data-about-animate="heading">
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-200">About</p>
             <h2 className="text-3xl font-semibold text-white sm:text-4xl lg:text-5xl">
               {profile?.name ?? 'Crewmate'} keeps mission crews aligned even when telemetry spikes.
@@ -764,11 +855,13 @@ export const HomePage = () => {
             </p>
           </div>
 
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,_1.05fr)_minmax(0,_0.95fr)] lg:items-stretch">
-            <div className="relative overflow-hidden rounded-[32px] border border-indigo-400/40 bg-gradient-to-br from-indigo-950/80 via-slate-950/70 to-slate-900/70 p-6 sm:p-8">
-              <div className="pointer-events-none absolute -top-24 -left-16 h-64 w-64 rounded-full bg-indigo-500/30 blur-3xl" />
-              <div className="pointer-events-none absolute -bottom-28 -right-20 h-64 w-64 rounded-full bg-purple-500/25 blur-3xl" />
-              <div className="relative flex h-full flex-col items-center gap-6 text-center sm:items-start sm:text-left">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,_0.95fr)_minmax(0,_1.05fr)] lg:items-start">
+            <div
+              className="relative overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-br from-indigo-950/85 via-slate-950/60 to-slate-900/60 p-6 sm:p-8"
+              data-about-animate="card"
+            >
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.18),transparent_65%)]" />
+              <div className="relative flex flex-col items-center gap-5 text-center sm:items-start sm:text-left">
                 {profile?.avatar_url ? (
                   <img
                     src={profile.avatar_url}
@@ -781,25 +874,42 @@ export const HomePage = () => {
                     {getInitial(profile?.name)}
                   </div>
                 )}
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <h3 className="text-2xl font-semibold text-white sm:text-3xl">{profile?.name ?? 'Crewmate'}</h3>
+                  {profile?.title ? (
+                    <p className="text-xs font-semibold uppercase tracking-[0.35em] text-indigo-200">{profile.title}</p>
+                  ) : null}
                   <p className="text-sm leading-relaxed text-indigo-100/85 sm:text-base">
                     {profile?.bio ?? 'I build interaction systems that keep crews confident while missions push the boundaries.'}
                   </p>
                 </div>
-                <div className="flex flex-wrap justify-center gap-3 text-xs font-semibold uppercase tracking-[0.35em] text-indigo-200 sm:justify-start">
-                  {profile?.title ? <span>{profile.title}</span> : null}
-                  <span className="text-indigo-100/70">{profile?.location ?? orbitLocation}</span>
+                <div className="flex flex-wrap justify-center gap-2 text-xs font-semibold uppercase tracking-[0.3em] text-indigo-200 sm:justify-start">
+                  <span
+                    className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-indigo-100"
+                    data-about-animate="meta"
+                  >
+                    <span className="inline-flex h-1.5 w-1.5 rounded-full bg-indigo-300" />
+                    {profile?.location ?? orbitLocation}
+                  </span>
+                  {primaryExperience?.company ? (
+                    <span
+                      className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-indigo-100"
+                      data-about-animate="meta"
+                    >
+                      <span className="inline-flex h-1.5 w-1.5 rounded-full bg-pink-300" />
+                      {primaryExperience.company}
+                    </span>
+                  ) : null}
                 </div>
                 {primaryExperience ? (
-                  <div className="w-full rounded-2xl border border-white/10 bg-white/5 p-4 text-left text-indigo-100/85 shadow-inner">
+                  <div
+                    className="w-full rounded-2xl border border-white/10 bg-white/5 p-4 text-left text-indigo-100/85 shadow-inner"
+                    data-about-animate="meta"
+                  >
                     <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-200">Current mission</p>
                     <p className="mt-2 text-base font-semibold text-white">{primaryExperience.role}</p>
-                    {primaryExperience.company ? (
-                      <p className="text-sm text-indigo-100/75">{primaryExperience.company}</p>
-                    ) : null}
                     {primaryExperience.duration ? (
-                      <p className="mt-3 text-xs uppercase tracking-[0.35em] text-indigo-200">{primaryExperience.duration}</p>
+                      <p className="mt-1 text-xs uppercase tracking-[0.35em] text-indigo-200">{primaryExperience.duration}</p>
                     ) : null}
                   </div>
                 ) : null}
@@ -807,6 +917,7 @@ export const HomePage = () => {
                   type="button"
                   className="group inline-flex items-center justify-center gap-3 rounded-full border border-indigo-400/40 bg-white/10 px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-indigo-100 transition hover:border-white/60 hover:bg-white/20"
                   data-cursor="pointer"
+                  data-about-animate="meta"
                   whileHover={{ scale: 1.04, y: -2 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handleScrollToSection('contact')}
@@ -819,37 +930,50 @@ export const HomePage = () => {
               </div>
             </div>
 
-            <div className="grid h-full gap-4 sm:grid-cols-2">
-              {aboutHighlights.map((item) => (
-                <motion.div
-                  key={item.label}
-                  className="rounded-2xl border border-white/10 bg-white/5 p-5 text-left backdrop-blur-xl transition-[transform,border-color] hover:border-indigo-400/60"
-                  whileHover={{ y: -4 }}
-                >
-                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-200">{item.label}</p>
-                  <p className="mt-2 break-words text-lg font-semibold text-white">{item.value}</p>
-                  <p className="mt-2 text-xs text-indigo-100/80">{item.description}</p>
-                </motion.div>
-              ))}
-
-              <motion.div
-                className="col-span-full rounded-2xl border border-indigo-400/30 bg-indigo-500/10 p-5 text-left backdrop-blur-xl"
-                whileHover={{ y: -4 }}
+            <div className="grid gap-6">
+              <div
+                className="rounded-[28px] border border-white/10 bg-white/5 p-6 shadow-[0_10px_40px_rgba(15,23,42,0.35)] backdrop-blur-xl sm:p-7"
+                data-about-animate="card"
               >
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-200">Signal traits</p>
+                <div className="flex items-center justify-between gap-4">
+                  <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-200">Mission snapshot</p>
+                  <span className="text-xs text-indigo-100/70">Quick view</span>
+                </div>
+                <ul className="mt-4 grid gap-4">
+                  {conciseHighlights.map((item) => (
+                    <li
+                      key={item.id ?? item.label}
+                      className="rounded-2xl border border-white/10 bg-white/5 p-4"
+                      data-about-animate="meta"
+                    >
+                      <p className="text-lg font-semibold text-white">{item.value}</p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.28em] text-indigo-200">{item.label}</p>
+                      <p className="mt-1 text-xs text-indigo-100/75">{item.description ?? 'Details on standby.'}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div
+                className="rounded-[28px] border border-white/10 bg-gradient-to-br from-indigo-500/10 via-sky-500/5 to-purple-500/10 p-6 backdrop-blur-xl sm:p-7"
+                data-about-animate="card"
+              >
+                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-200">Signal traits</p>
                 <div className="mt-4 flex flex-wrap gap-2">
                   {ABOUT_TRAIT_BADGES.map((trait) => (
                     <span
                       key={trait}
-                      className="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-indigo-100"
+                      className="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-indigo-100"
+                      data-about-animate="meta"
                     >
                       {trait}
                     </span>
                   ))}
                 </div>
-              </motion.div>
+              </div>
             </div>
           </div>
+
         </motion.div>
       </section>
 
@@ -887,3 +1011,5 @@ export const HomePage = () => {
     </div>
   );
 };
+
+

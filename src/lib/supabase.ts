@@ -1,4 +1,4 @@
-﻿import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -45,6 +45,9 @@ export type Database = {
           avatar_url: string | null;
           created_at: string;
           updated_at: string;
+          nav_label?: string | null;
+          headline_words?: string[] | null;
+          about_background_url?: string | null;
         };
         Insert: Omit<Database['public']['Tables']['profiles']['Row'], 'id' | 'created_at' | 'updated_at'>;
         Update: Partial<Database['public']['Tables']['profiles']['Insert']>;
@@ -114,3 +117,4 @@ export type Database = {
     };
   };
 };
+
